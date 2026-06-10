@@ -62,7 +62,7 @@ void loop()
 
     loopSD(filteredGyro);
 
-    printGyro(1, filteredGyro);
+    printGyro(0, filteredGyro);
 
     // type q in the serial monitor to stop the program
     // and flush the data in the sd card

@@ -106,8 +106,6 @@ void setupGyro()
     writeRegister(0x6B, 0x01, CS_IMU);
     delay(50);
     uint8_t power2_cfg = readRegister(0x6C, CS_IMU);
-    Serial.print("power2_cfg = 0x");
-    Serial.println(power2_cfg, HEX);
     writeRegister(0x6C, 0b11000000 & power2_cfg, CS_IMU);
     delay(50);
     power2_cfg = readRegister(0x6C, CS_IMU);
@@ -123,6 +121,13 @@ void setupGyro()
     uint8_t gyro_cfg = readRegister(0x1B, CS_IMU);
     Serial.print("GYRO_CONFIG = 0x");
     Serial.println(gyro_cfg, HEX);
+
+    uint8_t config = readRegister(0x1A, CS_IMU);
+    writeRegister(0x1A, 0b00000001, CS_IMU);
+    delay(1);
+    config = readRegister(0x1A, CS_IMU);
+    Serial.print("config = 0b");
+    Serial.println(config, BIN);
 
     // compute bias of the gyro
     computeBiasGyro();

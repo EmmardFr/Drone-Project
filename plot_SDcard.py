@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-filename = "gyro0052"
+filename = "gyro0054"
 
 df = pd.read_csv(f"D:/{filename}.csv")
 
