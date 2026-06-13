@@ -25,8 +25,9 @@ struct RCChannels {
 
 RCChannels rx;
 
-uint8_t frame[25];
+bool rxFlushSD = false;
 
+uint8_t frame[25];
 
 void setupRx()
 {
@@ -40,6 +41,7 @@ bool readSBUS()
   while(Serial1.available())
   {
     uint8_t b = Serial1.read();
+    // Serial.print(b, HEX);
 
     if(idx == 0)
     {
@@ -78,7 +80,12 @@ void normalizeChannels()
   rx.pitch      =  (rx.pitch - 992) / 1000.0;
   rx.yaw        =    (rx.yaw - 992) / 1000.0;
 
-  rx.armSwitch  = (rx.armSwitch > 1000) ? 1 : 0;
+  rx.armSwitch = (rx.armSwitch > 1000) ? 1 : 0;
+  static bool rxArmSwitch = 0;
+  if(rxArmSwitch == 1 && rx.armSwitch == 0)
+    rxFlushSD = true;
+  rxArmSwitch = rx.armSwitch;
+
   rx.switch2    = (rx.switch2 > 1500) ? 1 : ((rx.switch2 < 500) ? -1 : 0);
   rx.switch3    = (rx.switch3 > 1500) ? 1 : ((rx.switch3 < 500) ? -1 : 0);
   rx.switch4    = (rx.switch4 > 1500) ? 1 : ((rx.switch4 < 500) ? -1 : 0);
@@ -112,6 +119,9 @@ void decodeSBUS(uint8_t frame[25])
   rx.failsafe   =   frame[23] & (1 << 3);
 
   normalizeChannels();
+
+  if(rx.failsafe && rx.armSwitch)
+    rxFlushSD = true;
 }
 
 void printRx(bool doIt)
