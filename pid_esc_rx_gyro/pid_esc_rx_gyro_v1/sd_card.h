@@ -35,11 +35,11 @@ void setupSD()
         while(1);
     }
 
-    logFile.println("time_us,gyroX,gyroY,gyroZ,rxThrottle,rxRoll,rxPitch,rxYaw,armSwitch,frameLost,failsafe");
+    logFile.println("time_us,gyroX,gyroY,gyroZ,rxThrottle,rxRoll,rxPitch,rxYaw,armSwitch,frameLost,failsafe,pidRoll,pidPitch,pidYaw,motor1,motor2,motor3,motor4");
     logFile.flush();
 }
 
-void loopSD(Gyro gyro)
+void loopSD(Gyro gyro, MOTOR_POWER pwr)
 {
     static uint32_t t0_us = micros();
     uint32_t t = micros() - t0_us;
@@ -65,5 +65,21 @@ void loopSD(Gyro gyro)
     logFile.print(",");
     logFile.print(rx.frameLost);
     logFile.print(",");
-    logFile.println(rx.failsafe);
+    logFile.print(rx.failsafe);
+    logFile.print(",");
+
+    logFile.print(pid.roll);
+    logFile.print(",");
+    logFile.print(pid.pitch);
+    logFile.print(",");
+    logFile.print(pid.yaw);
+    logFile.print(",");
+
+    logFile.print(pwr.motor1);
+    logFile.print(",");
+    logFile.print(pwr.motor2);
+    logFile.print(",");
+    logFile.print(pwr.motor3);
+    logFile.print(",");
+    logFile.println(pwr.motor4);
 }

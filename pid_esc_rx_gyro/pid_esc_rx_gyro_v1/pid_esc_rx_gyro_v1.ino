@@ -1,9 +1,9 @@
 #include "gyro.h"
 #include "rx.h"
-#include "sd_card.h"
 #include "esc.h"
 #include "pid.h"
 #include "motor_mix.h"
+#include "sd_card.h"
 
 constexpr uint32_t LOOP_PERIOD_US = 1000; // 1 kHz
 
@@ -73,9 +73,9 @@ void loop()
   Gyro raw = readGyro();
   Gyro filteredGyro = filterGyro(raw);
 
-  loopSD(filteredGyro);
-
   printGyro(0, filteredGyro);
+
+  MOTOR_POWER motor_power;
 
   if(rx.armSwitch == 0)
   {
@@ -83,13 +83,15 @@ void loop()
     sendThrottle(MOTOR_STOP, MOTOR_PIN2);
     sendThrottle(MOTOR_STOP, MOTOR_PIN3);
     sendThrottle(MOTOR_STOP, MOTOR_PIN4);
+
+    motor_power = {0,0,0,0};
   }
   else
   {
     computePid(rx.roll, -rx.pitch, -rx.yaw, filteredGyro.y, filteredGyro.x, filteredGyro.z);
     printPID(0);
 
-    MOTOR_POWER motor_power = computePower(rx.throttle, pid.roll, pid.pitch, pid.yaw);
+    motor_power = computePower(rx.throttle, pid.roll, pid.pitch, pid.yaw);
     printMPower(motor_power, 0);
     
     sendThrottle(motor_power.motor1, MOTOR_PIN1);
@@ -97,6 +99,8 @@ void loop()
     sendThrottle(motor_power.motor3, MOTOR_PIN3);
     sendThrottle(motor_power.motor4, MOTOR_PIN4);
   }
+
+  loopSD(filteredGyro, motor_power);
 
   // static uint32_t t = micros();
   // uint32_t dt = micros() - t;
