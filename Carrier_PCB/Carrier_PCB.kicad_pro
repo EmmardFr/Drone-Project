@@ -648,7 +648,7 @@
         "uuid": "71ef07e0-dd5c-4940-8dab-9051a57f0884"
       }
     ],
-    "used_designators": "D1,#PWR1-3,C1-5,J_MPU1,J_ESC1-2,H1-8,H_MPU1-2,TP_SCLK1,TP_M1-4,J1-2,J_RXSR1-2,R1,TP_FSYNC1,TP_3V1,TP_5V1,TP_5vIN1,TP_CURRENT1,TP_GND1,TP_INT1,TP_NCS1,TP_SBUS1,TP_TLM1,TP_SD1,TP_SDI1,TP_SPORT1",
+    "used_designators": "",
     "variants": []
   },
   "sheets": [
