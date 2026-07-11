@@ -511,7 +511,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Carrier_PCB.kicad_pro",
+    "filename": "Carrier_PCB_v2.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -677,6 +677,14 @@
     "meta": {
       "version": 1
     },
+    "ngspice": {
+      "fix_include_paths": true,
+      "meta": {
+        "version": 0
+      },
+      "model_mode": 4,
+      "workbook_filename": ""
+    },
     "page_layout_descr_file": "",
     "plot_directory": "",
     "reuse_designators": true,
@@ -684,18 +692,18 @@
     "subpart_id_separator": 0,
     "top_level_sheets": [
       {
-        "filename": "Carrier_PCB.kicad_sch",
-        "name": "Root",
+        "filename": "Carrier_PCB_v2.kicad_sch",
+        "name": "Carrier_PCB_v2",
         "uuid": "71ef07e0-dd5c-4940-8dab-9051a57f0884"
       }
     ],
-    "used_designators": "",
+    "used_designators": "TP_SCLK1,TP_M1-4,J1-2,R1-3,#FLG1-3,D1,#PWR1-16,5V1,J_MPU1,C1-3,J_ESC1-2,H1-8,H_MPU1-2,SPORT1,J_RXSR1-2,TP_3V1,TP_5V1,TP_GND1,TP_INT1,TP_NCS1,TP_SBUS1,TP_TLM1,TP_SD1,TP_SDI1,3V1,TP_SPORT1,GND1,M1-4,TLM1,INT1,SCLK1,SD1,SDI1,SDO1,NCS1,SBUS1,RXSR1-2",
     "variants": []
   },
   "sheets": [
     [
       "71ef07e0-dd5c-4940-8dab-9051a57f0884",
-      "Root"
+      "Carrier_PCB_v2"
     ]
   ],
   "text_variables": {},
