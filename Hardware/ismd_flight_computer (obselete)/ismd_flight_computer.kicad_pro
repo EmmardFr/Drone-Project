@@ -760,34 +760,17 @@
     "top_level_sheets": [
       {
         "filename": "ismd_flight_computer.kicad_sch",
-        "name": "ismd_flight_computer_old",
-        "uuid": "aea51374-8d3f-4ae4-9fa0-837b4b32d77b"
-      },
-      {
-        "filename": "ismd_flight_computer_v2.kicad_sch",
         "name": "ismd_flight_computer",
         "uuid": "2ee7fb3b-5d46-4069-8d60-be8511034763"
       }
     ],
-    "used_designators": "U5,C41-42,C63-64,BMP582,#PWR66,#PWR105,#PWR109-110,#PWR113,#PWR168-173",
+    "used_designators": "",
     "variants": []
   },
   "sheets": [
     [
       "2ee7fb3b-5d46-4069-8d60-be8511034763",
       "ismd_flight_computer"
-    ],
-    [
-      "0ffc73ac-86a3-456b-8779-1e09e021b934",
-      "BMP581"
-    ],
-    [
-      "c0266f0e-4bb6-452f-9b96-ff4200df4aa2",
-      "DPS368"
-    ],
-    [
-      "aea51374-8d3f-4ae4-9fa0-837b4b32d77b",
-      "ismd_flight_computer_old"
     ]
   ],
   "text_variables": {},
