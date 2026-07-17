@@ -416,7 +416,7 @@
         "uuid": "ce1b43a9-5bb2-4287-b106-e7fd94ececa3"
       }
     ],
-    "used_designators": "U4,U6,#PWR66,#PWR105,#PWR109-110,#PWR113,#PWR144,#PWR149-150,#PWR153-154,#PWR160-165,#PWR168-180,#PWR188-192,#PWR194,#PWR196,C1-4,C55-56,C61-62,C70,C72,C74,B1-2,TEENSY4.2,DPS311",
+    "used_designators": "C7-10,C17-20,C61-62,C70,C72,C74,A1,#PWR1,#PWR60-78,#PWR160-167,#PWR181-201,U1-4,U6",
     "variants": []
   },
   "sheets": [
@@ -426,11 +426,43 @@
     ],
     [
       "c818f7dd-8d19-4143-b9ed-780b542fa28c",
-      "BMP581"
+      "B1-BMP581"
     ],
     [
       "78832b42-ba6c-4d7b-b4d8-7325219c6c60",
-      "DPS368"
+      "B2-DPS368"
+    ],
+    [
+      "c3e9bba6-4ad4-4f56-bd5c-ff06e5b26cf1",
+      "B3-ICP-20100"
+    ],
+    [
+      "17b536dc-bfb3-4473-b79d-bbe592d2bd87",
+      "B4-MS5611"
+    ],
+    [
+      "c90ad823-5a6f-4940-87a3-93fb36151551",
+      "B5-LPS22DF"
+    ],
+    [
+      "fbc24dc9-1573-412f-ae4f-03a5996d7da2",
+      "B6_ENS220"
+    ],
+    [
+      "56169296-68d7-4c34-b0ac-4c5c54c76b50",
+      "I1-ICM-42688-P"
+    ],
+    [
+      "dd63d83f-80b7-482e-976f-6aaaba499fba",
+      "I2-BMI088"
+    ],
+    [
+      "a1cedee4-fd75-4dc0-b472-ee6ec02bdebd",
+      "I3-BMI270"
+    ],
+    [
+      "6e127363-4f9e-4a02-94ac-8294d7e66ed2",
+      "I4-ISM330DLC"
     ]
   ],
   "text_variables": {},
