@@ -1,0 +1,73 @@
+name: Auto Merge Branches Into Main
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  merge-clean-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge conflict-free branches into main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          git fetch --prune origin "+refs/heads/*:refs/remotes/origin/*"
+
+          if ! git show-ref --verify --quiet refs/remotes/origin/main; then
+            echo "origin/main not found."
+            exit 1
+          fi
+
+          git checkout -B main refs/remotes/origin/main
+
+          merged_any=0
+
+          while IFS= read -r branch; do
+            if [ "${branch}" = "main" ]; then
+              continue
+            fi
+
+            remote_ref="refs/remotes/origin/${branch}"
+
+            if git merge-base --is-ancestor "${remote_ref}" HEAD; then
+              echo "Skipping ${branch}: already merged."
+              continue
+            fi
+
+            echo "Checking ${branch} for merge conflicts with main..."
+
+            if git merge --no-commit --no-ff "${remote_ref}" > /tmp/merge-check.log 2>&1; then
+              git merge --abort
+              git merge --no-ff -m "chore: auto-merge ${branch} into main" "${remote_ref}"
+              merged_any=1
+              echo "Merged ${branch} into main."
+            else
+              echo "Skipping ${branch}: merge conflict detected."
+              cat /tmp/merge-check.log
+              git merge --abort || true
+            fi
+          done < <(git for-each-ref --format='%(refname:strip=3)' refs/remotes/origin)
+
+          if [ "${merged_any}" -eq 1 ]; then
+            git push origin HEAD:main
+            echo "Pushed merged updates to main."
+          else
+            echo "No conflict-free branches found to merge."
+          fi
