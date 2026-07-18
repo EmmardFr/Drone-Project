@@ -1246,7 +1246,7 @@
 				)
 			)
 		)
-		(property "Value" "ICM-42688-P"
+		(property "Value" "ICM-42688"
 			(at 60.96 39.37 0)
 			(show_name no)
 			(do_not_autoplace no)
