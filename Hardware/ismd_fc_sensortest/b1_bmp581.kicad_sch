@@ -1003,7 +1003,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "6f77834d-d810-405d-ae09-54b3c228bbe8")
-		(property "Reference" "C15"
+		(property "Reference" "C1"
 			(at 20.066 35.052 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1025,7 +1025,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0201_0603Metric"
 			(at 25.7048 30.48 0)
 			(hide yes)
 			(show_name no)
@@ -1067,7 +1067,7 @@
 		(instances
 			(project "ismd_fc_sensortest"
 				(path "/ce1b43a9-5bb2-4287-b106-e7fd94ececa3/c818f7dd-8d19-4143-b9ed-780b542fa28c"
-					(reference "C15")
+					(reference "C1")
 					(unit 1)
 				)
 			)
@@ -1454,7 +1454,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b86633d0-d4ef-49b0-885b-614a0f53310b")
-		(property "Reference" "C16"
+		(property "Reference" "C2"
 			(at 19.812 54.356 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1476,7 +1476,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0201_0603Metric"
 			(at 25.7048 49.53 0)
 			(hide yes)
 			(show_name no)
@@ -1518,7 +1518,7 @@
 		(instances
 			(project "ismd_fc_sensortest"
 				(path "/ce1b43a9-5bb2-4287-b106-e7fd94ececa3/c818f7dd-8d19-4143-b9ed-780b542fa28c"
-					(reference "C16")
+					(reference "C2")
 					(unit 1)
 				)
 			)

@@ -1838,6 +1838,10 @@
 		(uuid "1d25be18-bd38-4538-a659-921f77284dac")
 	)
 	(no_connect
+		(at 124.46 33.02)
+		(uuid "30bbf323-58c0-4f82-afa3-fef3020b2ca8")
+	)
+	(no_connect
 		(at 177.8 60.96)
 		(uuid "316ad1b8-cb8d-4426-83dd-e700364a6648")
 	)
@@ -2058,16 +2062,6 @@
 			(justify left bottom)
 		)
 		(uuid "22eb7389-37bf-4836-bec5-d13bbf858cbb")
-	)
-	(label "CS_B6"
-		(at 124.46 33.02 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "24ce6606-b068-4796-aef1-eee1fe1a7446")
 	)
 	(label "INT_I1_2"
 		(at 64.77 26.67 0)

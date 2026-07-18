@@ -1075,7 +1075,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "154feac2-e651-4a92-841e-31dea5127b48")
-		(property "Reference" "C11"
+		(property "Reference" "C10"
 			(at 91.44 32.512 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1097,7 +1097,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0201_0603Metric"
 			(at 87.3252 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -1139,7 +1139,7 @@
 		(instances
 			(project "ismd_fc_sensortest"
 				(path "/ce1b43a9-5bb2-4287-b106-e7fd94ececa3/56169296-68d7-4c34-b0ac-4c5c54c76b50"
-					(reference "C11")
+					(reference "C10")
 					(unit 1)
 				)
 			)
@@ -1497,7 +1497,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "4b7c1f1f-7c74-46f5-b2af-42deab68b2b9")
-		(property "Reference" "C13"
+		(property "Reference" "C12"
 			(at 98.806 52.07 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1519,7 +1519,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0201_0603Metric"
 			(at 100.33 46.0248 0)
 			(hide yes)
 			(show_name no)
@@ -1561,7 +1561,7 @@
 		(instances
 			(project "ismd_fc_sensortest"
 				(path "/ce1b43a9-5bb2-4287-b106-e7fd94ececa3/56169296-68d7-4c34-b0ac-4c5c54c76b50"
-					(reference "C13")
+					(reference "C12")
 					(unit 1)
 				)
 			)
@@ -1578,7 +1578,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "8941cd13-1355-48fd-a18f-1c96bc0c1c81")
-		(property "Reference" "C12"
+		(property "Reference" "C11"
 			(at 97.79 32.512 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1600,7 +1600,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0201_0603Metric"
 			(at 93.6752 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -1642,7 +1642,7 @@
 		(instances
 			(project "ismd_fc_sensortest"
 				(path "/ce1b43a9-5bb2-4287-b106-e7fd94ececa3/56169296-68d7-4c34-b0ac-4c5c54c76b50"
-					(reference "C12")
+					(reference "C11")
 					(unit 1)
 				)
 			)
