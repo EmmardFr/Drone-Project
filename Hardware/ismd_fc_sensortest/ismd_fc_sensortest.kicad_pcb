@@ -206,7 +206,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "03fa18b8-48b5-4b63-84b8-002790314908")
-		(at 39.7 98.654 180)
+		(at 39.675 97.696 180)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C8"
@@ -358,7 +358,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "0a579858-b284-4115-95b2-af75abb398eb")
-		(at 47.9 102.754 180)
+		(at 47.875 101.796 180)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C7"
@@ -626,7 +626,7 @@
 	(footprint "MS5611:SON125P500X300X100-8N"
 		(layer "F.Cu")
 		(uuid "11eb8a19-a17c-42ee-b07b-3fe998d1132f")
-		(at 48.8 100.158 90)
+		(at 48.775 99.2 90)
 		(property "Reference" "B4"
 			(at 3.404 0 180)
 			(layer "F.SilkS")
@@ -1050,7 +1050,7 @@
 			)
 			(polygon
 				(pts
-					(xy 46.895 100.533209) (xy 46.895 99.777) (xy 50.73457 99.777) (xy 50.73457 100.533209)
+					(xy 46.87 99.575209) (xy 46.87 98.819) (xy 50.70957 98.819) (xy 50.70957 99.575209)
 				)
 			)
 		)
@@ -1080,7 +1080,7 @@
 			)
 			(polygon
 				(pts
-					(xy 47.3625 102.03337) (xy 47.3625 98.283) (xy 47.73729 98.283) (xy 47.73729 102.03337)
+					(xy 47.3375 101.07537) (xy 47.3375 97.325) (xy 47.71229 97.325) (xy 47.71229 101.07537)
 				)
 			)
 		)
@@ -1110,7 +1110,7 @@
 			)
 			(polygon
 				(pts
-					(xy 48.6125 102.03646) (xy 48.6125 98.283) (xy 48.987847 98.283) (xy 48.987847 102.03646)
+					(xy 48.5875 101.07846) (xy 48.5875 97.325) (xy 48.962847 97.325) (xy 48.962847 101.07846)
 				)
 			)
 		)
@@ -1140,7 +1140,7 @@
 			)
 			(polygon
 				(pts
-					(xy 49.8625 102.03597) (xy 49.8625 98.283) (xy 50.23977 98.283) (xy 50.23977 102.03597)
+					(xy 49.8375 101.07797) (xy 49.8375 97.325) (xy 50.21477 97.325) (xy 50.21477 101.07797)
 				)
 			)
 		)
@@ -1170,7 +1170,7 @@
 			)
 			(polygon
 				(pts
-					(xy 46.895 100.533263) (xy 46.895 99.777) (xy 50.73486 99.777) (xy 50.73486 100.533263)
+					(xy 46.87 99.575263) (xy 46.87 98.819) (xy 50.70986 98.819) (xy 50.70986 99.575263)
 				)
 			)
 		)
@@ -1200,7 +1200,7 @@
 			)
 			(polygon
 				(pts
-					(xy 47.3625 102.03378) (xy 47.3625 98.283) (xy 47.73706 98.283) (xy 47.73706 102.03378)
+					(xy 47.3375 101.07578) (xy 47.3375 97.325) (xy 47.71206 97.325) (xy 47.71206 101.07578)
 				)
 			)
 		)
@@ -1230,7 +1230,7 @@
 			)
 			(polygon
 				(pts
-					(xy 48.6125 102.03522) (xy 48.6125 98.283) (xy 48.987722 98.283) (xy 48.987722 102.03522)
+					(xy 48.5875 101.07722) (xy 48.5875 97.325) (xy 48.962722 97.325) (xy 48.962722 101.07722)
 				)
 			)
 		)
@@ -1260,7 +1260,7 @@
 			)
 			(polygon
 				(pts
-					(xy 49.8625 102.03549) (xy 49.8625 98.283) (xy 50.23941 98.283) (xy 50.23941 102.03549)
+					(xy 49.8375 101.07749) (xy 49.8375 97.325) (xy 50.21441 97.325) (xy 50.21441 101.07749)
 				)
 			)
 		)
@@ -1290,7 +1290,7 @@
 			)
 			(polygon
 				(pts
-					(xy 46.895 100.533312) (xy 46.895 99.777) (xy 50.73512 99.777) (xy 50.73512 100.533312)
+					(xy 46.87 99.575312) (xy 46.87 98.819) (xy 50.71012 98.819) (xy 50.71012 99.575312)
 				)
 			)
 		)
@@ -1320,7 +1320,7 @@
 			)
 			(polygon
 				(pts
-					(xy 47.3625 102.03596) (xy 47.3625 98.283) (xy 47.73582 98.283) (xy 47.73582 102.03596)
+					(xy 47.3375 101.07796) (xy 47.3375 97.325) (xy 47.71082 97.325) (xy 47.71082 101.07796)
 				)
 			)
 		)
@@ -1350,7 +1350,7 @@
 			)
 			(polygon
 				(pts
-					(xy 48.6125 102.03601) (xy 48.6125 98.283) (xy 48.9878 98.283) (xy 48.9878 102.03601)
+					(xy 48.5875 101.07801) (xy 48.5875 97.325) (xy 48.9628 97.325) (xy 48.9628 101.07801)
 				)
 			)
 		)
@@ -1380,7 +1380,7 @@
 			)
 			(polygon
 				(pts
-					(xy 49.8625 102.03634) (xy 49.8625 98.283) (xy 50.24006 98.283) (xy 50.24006 102.03634)
+					(xy 49.8375 101.07834) (xy 49.8375 97.325) (xy 50.21506 97.325) (xy 50.21506 101.07834)
 				)
 			)
 		)
@@ -1784,7 +1784,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "2081ab49-ec47-4ee3-83b5-270883b7fb04")
-		(at 37.9 100.154)
+		(at 37.875 99.196)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C9"
@@ -1936,7 +1936,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "26f6b91e-e2f2-4848-b4b8-e136ea850d2b")
-		(at 39.8 93.354)
+		(at 39.775 92.396)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C12"
@@ -2088,7 +2088,7 @@
 	(footprint "Package_LGA:Bosch_LGA-16_4.5x3mm_P0.5mm_LayoutBorder7x1y_ClockwisePinNumbering"
 		(layer "F.Cu")
 		(uuid "2cc2733b-0e9c-45df-bb43-9f1a434ae541")
-		(at 39.8 82.5665)
+		(at 39.775 81.6085)
 		(descr "Bosch  LGA, 16 Pin (https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmi088-ds001.pdf#page=55)")
 		(tags "Bosch LGA NoLead")
 		(property "Reference" "I2"
@@ -2663,7 +2663,7 @@
 			)
 			(polygon
 				(pts
-					(xy 38.125 81.6415) (xy 41.475 81.6415) (xy 41.475 83.4915) (xy 38.125 83.4915)
+					(xy 38.1 80.6835) (xy 41.45 80.6835) (xy 41.45 82.5335) (xy 38.1 82.5335)
 				)
 			)
 		)
@@ -3303,122 +3303,6 @@
 			)
 		)
 	)
-	(footprint "MountingHole:MountingHole_4mm"
-		(layer "F.Cu")
-		(uuid "425b445c-c29a-4f2f-8825-83051aceae4c")
-		(at 29.702502 80.871)
-		(descr "Mounting Hole 4mm, no annular, generated by kicad-footprint-generator mountinghole.py")
-		(tags "mountinghole")
-		(property "Reference" "H9"
-			(at -0.002502 -2.971 0)
-			(layer "F.SilkS")
-			(uuid "3e2ff9dd-7a6e-407e-97f9-f8731df10f2c")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Value" "MountingHole"
-			(at 0 4.95 0)
-			(layer "F.Fab")
-			(uuid "b4429ac7-14f3-49a9-ad93-ee42c4c31669")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "c8037576-f169-4944-a913-3898b755a31e")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Mounting Hole without connection"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "cfa8fb9e-0acf-4d15-87a8-a8d0d8ffdb54")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KiLib_Generator" "mounting_hardware/mounting_hole"
-			(at 0 0 0)
-			(layer "F.SilkS")
-			(hide yes)
-			(uuid "2889eeda-d05e-4de7-998a-85e8bed0a5c6")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property ki_fp_filters "MountingHole*")
-		(path "/70c27f92-1b65-4ec7-b80f-bd20837ae04b")
-		(sheetname "/")
-		(sheetfile "ismd_fc_sensortest.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins)
-			)
-		)
-		(attr exclude_from_bom)
-		(duplicate_pad_numbers_are_jumpers no)
-		(fp_circle
-			(center 0 0)
-			(end 4 0)
-			(stroke
-				(width 0.15)
-				(type solid)
-			)
-			(fill no)
-			(layer "Cmts.User")
-			(uuid "9d44dcf5-76c3-43ea-a615-dba3cac64ec3")
-		)
-		(fp_circle
-			(center 0 0)
-			(end 4.25 0)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(fill no)
-			(layer "F.CrtYd")
-			(uuid "ded0c27f-569a-44e9-bf42-8f5edbae9ce1")
-		)
-		(fp_text user "${REFERENCE}"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(uuid "0591a023-2259-4145-acb4-4885d1522741")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(pad "" np_thru_hole circle
-			(at 0 0)
-			(size 4 4)
-			(drill 4)
-			(layers "*.Cu" "*.Mask")
-			(uuid "97866cf0-9ac4-4597-95f3-83a92c27619b")
-		)
-		(embedded_fonts no)
-	)
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "43ad1883-6eeb-437f-ad0e-561cdd1cb343")
@@ -3574,7 +3458,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "4880f44f-3925-48f4-933e-49995db63954")
-		(at 49.2 93.075)
+		(at 49.175 92.117)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C5"
@@ -3726,7 +3610,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "4deea9ce-fcee-478b-bcac-9dc6e38ef6cd")
-		(at 42.48 74.154)
+		(at 42.455 73.196)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C15"
@@ -3878,7 +3762,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "5b8c379b-1f58-4a93-b5b9-44784774498b")
-		(at 42.6 92.054 180)
+		(at 42.575 91.096 180)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C11"
@@ -4030,7 +3914,7 @@
 	(footprint "ICP-20100:PQFN50P200X200X85-10N"
 		(layer "F.Cu")
 		(uuid "5bd9f114-ad73-4cfa-9958-a8cdebc135e5")
-		(at 49.06 91.4)
+		(at 49.035 90.442)
 		(property "Reference" "B3"
 			(at 0.04 -3.625 0)
 			(layer "F.SilkS")
@@ -4497,7 +4381,7 @@
 	(footprint "ICM-42688-P:PQFN50P300X250X97-14N"
 		(layer "F.Cu")
 		(uuid "7a541af2-c856-4b09-ae75-e04f483f2438")
-		(at 40.0125 91.379)
+		(at 39.9875 90.421)
 		(property "Reference" "I1"
 			(at -0.0125 -3.625 0)
 			(layer "F.SilkS")
@@ -5468,7 +5352,7 @@
 				)
 			)
 		)
-		(property "Value" "TEENSY_4.1"
+		(property "Value" "TEENSY 4.1"
 			(at 24.13 -7.62 0)
 			(layer "F.SilkS")
 			(uuid "7abca7ef-75d0-49c7-a4bd-707157f5c32c")
@@ -6463,7 +6347,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "819bb435-6dbb-4e64-8304-04a3b1db8476")
-		(at 40 84.854 180)
+		(at 39.975 83.896 180)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C14"
@@ -6615,7 +6499,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "92367137-e49a-4e02-8787-2122fe15487f")
-		(at 42.6 92.854 180)
+		(at 42.575 91.896 180)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C10"
@@ -6883,7 +6767,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "a3b0ac22-8bb7-4b6e-b87f-425c370789cd")
-		(at 39.6 80.254)
+		(at 39.575 79.296)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C13"
@@ -7035,7 +6919,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "ab2e043a-e110-48cd-ae46-682fd25153b0")
-		(at 48.8 89.675 180)
+		(at 48.775 88.717 180)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C6"
@@ -7184,126 +7068,10 @@
 			)
 		)
 	)
-	(footprint "MountingHole:MountingHole_4mm"
-		(layer "F.Cu")
-		(uuid "b1bdefdd-f4e0-430f-b300-5f29b7a94e0d")
-		(at 49.702502 80.871)
-		(descr "Mounting Hole 4mm, no annular, generated by kicad-footprint-generator mountinghole.py")
-		(tags "mountinghole")
-		(property "Reference" "H10"
-			(at -0.002502 -2.871 0)
-			(layer "F.SilkS")
-			(uuid "4ad1218a-cc9d-4dc1-840b-cce94385ab5a")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Value" "MountingHole"
-			(at 0 4.95 0)
-			(layer "F.Fab")
-			(uuid "10d4e06a-b939-43e6-8840-c360cd8697d3")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "6d984d8e-9986-4791-8162-20fe8caf305c")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Mounting Hole without connection"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "668efe85-ed8a-4718-8967-03868a07334c")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KiLib_Generator" "mounting_hardware/mounting_hole"
-			(at 0 0 0)
-			(layer "F.SilkS")
-			(hide yes)
-			(uuid "3c2f87aa-edcf-40bd-bf49-e19631e6f9c7")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property ki_fp_filters "MountingHole*")
-		(path "/ec024fa0-ac75-40fe-bb66-9cb3fb256c95")
-		(sheetname "/")
-		(sheetfile "ismd_fc_sensortest.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins)
-			)
-		)
-		(attr exclude_from_bom)
-		(duplicate_pad_numbers_are_jumpers no)
-		(fp_circle
-			(center 0 0)
-			(end 4 0)
-			(stroke
-				(width 0.15)
-				(type solid)
-			)
-			(fill no)
-			(layer "Cmts.User")
-			(uuid "f2b88972-a870-4618-8831-a2215a17d857")
-		)
-		(fp_circle
-			(center 0 0)
-			(end 4.25 0)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(fill no)
-			(layer "F.CrtYd")
-			(uuid "19eb3ec1-e17d-4a9c-b4a3-0338eedcffd7")
-		)
-		(fp_text user "${REFERENCE}"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(uuid "be86f930-e519-429a-8a00-f3f95de6a03e")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(pad "" np_thru_hole circle
-			(at 0 0)
-			(size 4 4)
-			(drill 4)
-			(layers "*.Cu" "*.Mask")
-			(uuid "3d63f58a-1015-4f37-a790-e32a134ef930")
-		)
-		(embedded_fonts no)
-	)
 	(footprint "ISM330DLCTR:PQFN50P250X300X86-14N"
 		(layer "F.Cu")
 		(uuid "b2583564-cf0b-4106-9df0-3aae39a0e2ae")
-		(at 30.9125 91.379)
+		(at 48.8875 81.421)
 		(property "Reference" "I4"
 			(at -0.0125 -3.525 0)
 			(layer "F.SilkS")
@@ -7957,7 +7725,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "b4c508cb-c4c6-4483-aa67-7ac08e729076")
-		(at 30.7 93.354)
+		(at 48.675 83.396)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C18"
@@ -8109,7 +7877,7 @@
 	(footprint "Package_LGA:ST_HLGA-10_2x2mm_P0.5mm_LayoutBorder3x2y"
 		(layer "F.Cu")
 		(uuid "b70f0a31-81ca-403f-9aa9-57754de98801")
-		(at 39.9025 100.379)
+		(at 39.8775 99.421)
 		(descr "ST  HLGA, 10 Pin (https://www.st.com/resource/en/datasheet/lps22hh.pdf#page=55)")
 		(tags "ST HLGA NoLead")
 		(property "Reference" "B5"
@@ -8412,7 +8180,7 @@
 	(footprint "BMI270:XDCR_BMI270"
 		(layer "F.Cu")
 		(uuid "c12ea717-8bb5-4739-b021-228522b104f1")
-		(at 39.9875 73.379)
+		(at 39.9625 72.421)
 		(property "Reference" "I3"
 			(at 0.0125 -3.525 0)
 			(layer "F.SilkS")
@@ -8949,7 +8717,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "ca841ef9-0c22-4499-b0c5-66832d4c54b7")
-		(at 33.5 92.054)
+		(at 51.475 82.096)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C17"
@@ -9101,7 +8869,7 @@
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
 		(uuid "cb3c5191-534c-4b49-9873-dbf2fe7548b1")
-		(at 39.8 75.354)
+		(at 39.775 74.396)
 		(descr "Capacitor SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C16"
@@ -10184,19 +9952,8 @@
 		)
 	)
 	(gr_rect
-		(start 26.3 86.879)
-		(end 35.3 95.879)
-		(stroke
-			(width 0.2)
-			(type solid)
-		)
-		(fill no)
-		(layer "F.SilkS")
-		(uuid "70423c0c-21ea-4937-be1f-509b6cad44ca")
-	)
-	(gr_rect
-		(start 35.3 68.879)
-		(end 44.3 77.879)
+		(start 35.275 67.921)
+		(end 44.275 76.921)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -10206,8 +9963,8 @@
 		(uuid "1ebf18f4-d710-4a65-8dcc-02ef1909f69a")
 	)
 	(gr_rect
-		(start 35.3 77.879)
-		(end 44.3 86.879)
+		(start 35.275 76.921)
+		(end 44.275 85.921)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -10217,8 +9974,19 @@
 		(uuid "90613cfd-1450-4915-bca2-a9be29a8b519")
 	)
 	(gr_rect
-		(start 35.3 95.879)
-		(end 44.3 104.879)
+		(start 35.275 85.921)
+		(end 44.275 94.921)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "d6efc1f8-de94-4bcf-87ea-a6ff9ac2c273")
+	)
+	(gr_rect
+		(start 35.275 94.921)
+		(end 44.275 103.921)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -10228,8 +9996,19 @@
 		(uuid "93ecaab0-18ee-492c-b762-9cc1521bcd78")
 	)
 	(gr_rect
-		(start 44.3 86.9)
-		(end 53.3 95.9)
+		(start 44.275 76.921)
+		(end 53.275 85.921)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "70423c0c-21ea-4937-be1f-509b6cad44ca")
+	)
+	(gr_rect
+		(start 44.275 85.942)
+		(end 53.275 94.942)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -10239,8 +10018,8 @@
 		(uuid "7cd18b84-cab1-43e1-a932-aff60e68b3b7")
 	)
 	(gr_rect
-		(start 44.3 95.879)
-		(end 53.3 104.879)
+		(start 44.275 94.921)
+		(end 53.275 103.921)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -10825,22 +10604,12 @@
 		(layer "Edge.Cuts")
 		(uuid "b22a4566-7433-48b5-a41a-ef754a174523")
 	)
-	(group "parts placer"
-		(uuid "6bb230d3-4f57-4bbe-b8dd-b77d4692a9ed")
-		(members "03a21567-743e-46e0-b50c-786843a21287" "0cb69c3f-e702-4afc-b55d-cedab9f48393"
-			"1480e39c-4304-4300-9220-c31d08d3fed7" "16a5857f-0c42-476f-9f5d-831bb18f4303"
-			"2e5541d1-ba71-4868-a938-214997aef043" "425b445c-c29a-4f2f-8825-83051aceae4c"
-			"92b1d2c6-10db-40c2-8175-9e9438576f19" "b1bdefdd-f4e0-430f-b300-5f29b7a94e0d"
-			"b30ff53f-e466-4423-9e53-19422d19eb6f" "e1abc4df-0a88-4ba8-8f6b-7e76ef9e13f2"
-		)
-	)
 	(group ""
 		(uuid "5178f1c7-0e0d-4bb0-a20f-5a7762f2ceaa")
 		(members "03a21567-743e-46e0-b50c-786843a21287" "0cb69c3f-e702-4afc-b55d-cedab9f48393"
 			"1480e39c-4304-4300-9220-c31d08d3fed7" "16a5857f-0c42-476f-9f5d-831bb18f4303"
 			"1ff95e0d-1737-4e4f-8e85-70a20b99c48e" "2e5541d1-ba71-4868-a938-214997aef043"
-			"425b445c-c29a-4f2f-8825-83051aceae4c" "92b1d2c6-10db-40c2-8175-9e9438576f19"
-			"b1bdefdd-f4e0-430f-b300-5f29b7a94e0d" "b30ff53f-e466-4423-9e53-19422d19eb6f"
+			"92b1d2c6-10db-40c2-8175-9e9438576f19" "b30ff53f-e466-4423-9e53-19422d19eb6f"
 			"e1abc4df-0a88-4ba8-8f6b-7e76ef9e13f2"
 		)
 	)
