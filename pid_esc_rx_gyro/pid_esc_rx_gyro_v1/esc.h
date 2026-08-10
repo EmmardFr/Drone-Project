@@ -113,7 +113,7 @@ void setupESC()
   digitalWriteFast(MOTOR_PIN3, LOW);
   pinMode(MOTOR_PIN4, OUTPUT);
   digitalWriteFast(MOTOR_PIN4, LOW);
-  delay(100);
+  delay(1500);
 
   ARM_DEMCR |= ARM_DEMCR_TRCENA;   // Enable DWT
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;

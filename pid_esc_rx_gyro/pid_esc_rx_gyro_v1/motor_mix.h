@@ -1,5 +1,5 @@
 constexpr uint16_t MOTOR_STOP     = 0;
-constexpr uint16_t MOTOR_IDLE     = 147;
+constexpr uint16_t MOTOR_IDLE     = 130;
 constexpr uint16_t MOTOR_MAX      = 2047;
 
 struct MOTOR_POWER{
@@ -11,9 +11,9 @@ struct MOTOR_POWER{
 
 MOTOR_POWER computePower(float throttle, float roll, float pitch, float yaw)
 {
-  roll  = constrain(roll,  -300, 300);
-  pitch = constrain(pitch, -300, 300);
-  yaw   = constrain(yaw,   -300, 300);
+  roll  = constrain(roll,  -1000, 1000);
+  pitch = constrain(pitch, -1000, 1000);
+  yaw   = constrain(yaw,   -2000, 2000);
 
   MOTOR_POWER pwr = {0, 0, 0, 0};
   

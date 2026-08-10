@@ -22,18 +22,18 @@ String createLogFileName()
 
 void setupSD()
 {
-    if (!SD.begin(BUILTIN_SDCARD)) {
-        Serial.println("SD init failed!");
-        while(1);
-    }
+    // if (!SD.begin(BUILTIN_SDCARD)) {
+    //     Serial.println("SD init failed!");
+    //     while(1);
+    // }
 
-    String filename = createLogFileName();
-    logFile = SD.open(filename.c_str(), FILE_WRITE);
+    // String filename = createLogFileName();
+    // logFile = SD.open(filename.c_str(), FILE_WRITE);
 
-    if (!logFile) {
-        Serial.println("Failed to open file");
-        while(1);
-    }
+    // if (!logFile) {
+    //     Serial.println("Failed to open file");
+    //     while(1);
+    // }
 
     logFile.println("time_us,gyroX,gyroY,gyroZ,rxThrottle,rxRoll,rxPitch,rxYaw,armSwitch,frameLost,failsafe,pidRoll,pidPitch,pidYaw,motor1,motor2,motor3,motor4");
     logFile.flush();

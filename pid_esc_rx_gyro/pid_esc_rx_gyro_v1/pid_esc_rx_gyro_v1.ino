@@ -34,6 +34,15 @@ void stopProgram()
 
 void setup()
 {
+  setupESC();
+
+  ////////////////////////////////////////
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+  ////////////////////////////////////////
+
+  // delay(2000);
+  
   Serial.begin(115200);
 
   pinMode(CS_IMU, OUTPUT);
@@ -51,7 +60,6 @@ void setup()
   // Gyro setup
   setupRx();
 
-  setupESC();
 }
 
 void loop()
@@ -73,7 +81,7 @@ void loop()
   Gyro raw = readGyro();
   Gyro filteredGyro = filterGyro(raw);
 
-  printGyro(0, filteredGyro);
+  printGyro(1, filteredGyro);
 
   MOTOR_POWER motor_power;
 
