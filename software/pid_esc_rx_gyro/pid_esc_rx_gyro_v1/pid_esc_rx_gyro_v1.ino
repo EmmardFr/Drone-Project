@@ -81,7 +81,7 @@ void loop()
   Gyro raw = readGyro();
   Gyro filteredGyro = filterGyro(raw);
 
-  printGyro(1, filteredGyro);
+  printGyro(0, filteredGyro);
 
   MOTOR_POWER motor_power;
 

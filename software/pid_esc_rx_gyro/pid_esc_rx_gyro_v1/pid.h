@@ -1,4 +1,7 @@
-#define ROLLING_WINDOW_SIZE 256
+// #define ROLLING_WINDOW_SIZE 256
+
+#define ROLLING_WINDOW_SIZE 0
+#define I_LIMIT 15.0f
 
 struct PID_AXIS{
   float roll;
@@ -57,7 +60,12 @@ PID updateErrors(float current_control_rate, float current_gyro_rate, float prev
   }
   else
   {
-    errors.i += current_error;
+    // errors.i += current_error;
+    
+    integral += current_error * dt;
+    integral = constrain(integral, -I_LIMIT, I_LIMIT);
+
+    errors.i = integral;
   }
 
   return errors;
