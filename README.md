@@ -1,6 +1,6 @@
 # Drone-Project
 
-- `Hardware/` contains hardware design files:
+- `hardware/` contains hardware design files:
   - `Datasheets/`: component datasheets (IMUs, barometers, and related parts) used during hardware selection.
   - `Graphics/`: project graphics and visual assets.
   - `Schematics/`: standalone schematic libraries/references for key components (e.g., sensors and Teensy 4.1).
