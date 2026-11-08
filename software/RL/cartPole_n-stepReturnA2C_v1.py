@@ -7,15 +7,20 @@ import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
+import copy
+
 
 @dataclass
 class Config:
     actor_learning_rate: float = 0.001
     critic_learning_rate: float = 0.005
     discount_factor: float = 0.95
+    entropy_coef: float = 0.001
     n_steps: int = 10
-    training_episodes: int = 2000
+    training_episodes: int = 1000
     evaluation_episodes: int = 5
+    moving_avg_window: int = 50
+
 
 class CartPoleAgent:
     def __init__(self,
@@ -23,6 +28,7 @@ class CartPoleAgent:
                  actor_learning_rate: float,
                  critic_learning_rate: float,
                  discount_factor: float = 0.95,
+                 entropy_coef: float = 0.01,
                  ):
         """Initialize a Reinforcement-Learning agent.
 
@@ -35,20 +41,25 @@ class CartPoleAgent:
         self.actor_lr = actor_learning_rate
         self.critic_lr = critic_learning_rate
         self.discount_factor = discount_factor
+        self.entropy_coef = entropy_coef
 
         self.training_error = []
 
         self.actor = nn.Sequential(
             nn.Linear(4, 64),   # CartPole has 4 observation features
             nn.Tanh(),
+            nn.Linear(64, 64),
+            nn.Tanh(),
             nn.Linear(64, 2),   # logits for left/right
         )
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=self.actor_lr)
 
         self.critic = nn.Sequential(
-            nn.Linear(4,128),
+            nn.Linear(4,64),
             nn.Tanh(),
-            nn.Linear(128, 1),  # predicted state value
+            # nn.Linear(128,128),
+            # nn.Tanh(),
+            nn.Linear(64, 1),  # predicted state value
         )
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=self.critic_lr)
 
@@ -87,10 +98,10 @@ class CartPoleAgent:
         actions      = torch.stack(actions).to(dtype=torch.int64)
         rewards      = torch.as_tensor(np.array(rewards), dtype=torch.float32)
         terminations = torch.as_tensor(terminations, dtype=torch.bool)
-    
+
         return states, next_states, actions, rewards, terminations
-    
-    def update(self, env: gym.Env, nb_episodes: int, n_steps: int, states, next_states, actions, rewards, terminations):
+
+    def update(self, n_steps: int, states, next_states, actions, rewards, terminations):
         with torch.no_grad():
             next_values = self.critic(next_states).squeeze(-1)
 
@@ -102,7 +113,8 @@ class CartPoleAgent:
         distribution = Categorical(logits=self.actor(states))
         log_probs = distribution.log_prob(actions)
 
-        actor_loss  = - (log_probs * advantages.detach()).mean()
+        entropy = distribution.entropy().mean()
+        actor_loss  = - (log_probs * advantages.detach()).mean() - self.entropy_coef * entropy
         critic_loss = ((targets - values)**2).mean()
 
         self.actor_optimizer.zero_grad()
@@ -114,17 +126,35 @@ class CartPoleAgent:
         self.critic_optimizer.step()
 
 
-    def train(self, env: gym.Env, nb_episodes: int, n_steps: int):
+    def train(self, env: gym.Env, nb_episodes: int, n_steps: int, window: int) -> list[float]:
+        episode_returns = []
+
+        self.best_moving_avg = -float("inf")
+        self.best_actor_state = None
+        self.best_episode = None
+
         for episode in range(nb_episodes):
-                states, next_states, actions, rewards, terminations = self.collect_episode(env)
+            states, next_states, actions, rewards, terminations = self.collect_episode(env)
 
-                self.update(env, nb_episodes, n_steps, states, next_states, actions, rewards, terminations)
+            self.update(env, nb_episodes, n_steps, states, next_states, actions, rewards, terminations)
 
-                if (episode+1) % 50 == 0:
-                    print(
-                        f"Episode {episode + 1}: "
-                        f"return={rewards.sum().item():.0f}"
-                    )
+            episode_return = rewards.sum().item()
+            episode_returns.append(episode_return)
+
+            if len(episode_returns) >= window:
+                moving_avg = np.mean(episode_returns[-window:])
+                if moving_avg >= self.best_moving_avg:
+                    self.best_moving_avg = moving_avg
+                    self.best_actor_state = copy.deepcopy(self.actor.state_dict())
+                    self.best_episode = episode + 1
+
+            if (episode+1) % 50 == 0:
+                print(
+                    f"Episode {episode + 1}: "
+                    f"return={rewards.sum().item():.0f}"
+                )
+
+        return episode_returns
 
     def evaluate(self, env: gym.Env, nb_episodes: int) -> list[float]:
         rewards = []
@@ -143,17 +173,11 @@ class CartPoleAgent:
 
                 if terminated or truncated:
                     break
-            
+
             rewards.append(episode_reward)
         return rewards
 
-def compute_n_step_returns(
-    rewards: torch.Tensor,
-    next_values: torch.Tensor,
-    terminations: torch.Tensor,
-    gamma: float,
-    n_steps: int,
-) -> torch.Tensor:
+def compute_n_step_returns(rewards: torch.Tensor, next_values: torch.Tensor, terminations: torch.Tensor, gamma: float, n_steps: int) -> torch.Tensor:
     """Compute targets for one episode or a fragment ending at its boundary.
 
     All input tensors have shape [L].
@@ -181,6 +205,10 @@ def compute_n_step_returns(
 
     return targets
 
+
+#################################################################################
+##################################### PLOTS #####################################
+#################################################################################
 
 def describe_network(network: nn.Module) -> str:
     layers = [
@@ -233,7 +261,7 @@ def plot_evaluation_rewards(
         f"Weight decay: {optimizer_settings['weight_decay']:g}",
         "",
         f"Return horizon: {config.n_steps} steps",
-        "Entropy bonus: none",
+        f"Entropy coefficient: {agent.entropy_coef:g}",
         "Gradient clipping: none",
         "Advantage normalization: none",
         "Random seed: not fixed",
@@ -301,6 +329,107 @@ def plot_evaluation_rewards(
     return output_path
 
 
+def plot_training_rewards(
+    episode_returns: list[float],
+    config: Config,
+    agent: CartPoleAgent,
+    output_dir: Path,
+    window: int,
+) -> Path:
+    """Save and display the return of every training episode, with a moving average."""
+    if not episode_returns:
+        raise ValueError("episode_returns must not be empty")
+
+    returns = np.asarray(episode_returns, dtype=float)
+    episodes = np.arange(1, len(returns) + 1)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    index = 1
+    while True:
+        output_path = output_dir / f"training_rewards_{index:04d}.png"
+        if not output_path.exists():
+            break
+        index += 1
+
+    summary = "\n".join([
+        "TRAINING",
+        f"Episodes: {config.training_episodes}",
+        f"Actor lr: {agent.actor_lr:g}",
+        f"Critic lr: {agent.critic_lr:g}",
+        f"Discount factor: {agent.discount_factor:g}",
+        f"Return horizon: {config.n_steps} steps",
+        f"Entropy coefficient: {agent.entropy_coef:g}",
+        f"Actor: {describe_network(agent.actor)}",
+        f"Critic: {describe_network(agent.critic)}",
+        "",
+        f"Last {min(window, len(returns))} ep. mean: {returns[-window:].mean():.1f}",
+        f"Best episode: {returns.max():.0f}",
+    ])
+
+    fig, ax = plt.subplots(figsize=(13, 7))
+
+    try:
+        fig.subplots_adjust(right=0.70)
+
+        ax.plot(
+            episodes,
+            returns,
+            color="tab:blue",
+            alpha=0.35,
+            linewidth=1,
+            label="Episode return",
+        )
+
+        if len(returns) >= window:
+            moving_avg = np.convolve(returns, np.ones(window) / window, mode="valid")
+            ax.plot(
+                episodes[window - 1:],
+                moving_avg,
+                color="tab:blue",
+                linewidth=2,
+                label=f"Moving average ({window} episodes)",
+            )
+
+        ax.axhline(
+            500,
+            color="tab:green",
+            linestyle=":",
+            label="Max return (500)",
+        )
+
+        ax.set(
+            title="CartPole — training episode returns",
+            xlabel="Training episode",
+            ylabel="Total reward",
+            ylim=(0, 525),
+            xlim=(1, len(returns)),
+        )
+        ax.grid(alpha=0.3)
+        ax.legend(loc="upper left")
+
+        fig.text(
+            0.73, 0.94,
+            summary,
+            va="top",
+            ha="left",
+            fontsize=9,
+            fontfamily="monospace",
+            linespacing=1.4,
+        )
+
+        fig.savefig(output_path, dpi=200, bbox_inches="tight")
+        print(f"Plot saved to: {output_path}")
+        plt.show()
+    finally:
+        plt.close(fig)
+
+    return output_path
+
+
+#################################################################################
+##################################### MAIN ######################################
+#################################################################################
 
 def main():
     config = Config()
@@ -309,31 +438,41 @@ def main():
         actor_learning_rate=config.actor_learning_rate,
         critic_learning_rate=config.critic_learning_rate,
         discount_factor=config.discount_factor,
+        entropy_coef=config.entropy_coef,
     )
 
     env = gym.make("CartPole-v1")
     try:
-        agent.train(
+        training_returns = agent.train(
             env,
             nb_episodes=config.training_episodes,
             n_steps=config.n_steps,
+            window=config.moving_avg_window,
         )
     finally:
         env.close()
 
+    if agent.best_actor_state is not None:
+        agent.actor.load_state_dict(agent.best_actor_state)
+        print(
+            f"Loaded best actor from episode {agent.best_episode} "
+            f"(moving average {agent.best_moving_avg:.1f})"
+        )
+
     eval_env = gym.make("CartPole-v1", render_mode="human")
     try:
-        episode_rewards = agent.evaluate(
+        test_rewards = agent.evaluate(
             eval_env,
             nb_episodes=config.evaluation_episodes,
         )
     finally:
         eval_env.close()
 
-    print(f"Mean evaluation return: {np.mean(episode_rewards):.1f}")
+    print(f"Mean evaluation return: {np.mean(test_rewards):.1f}")
 
     output_dir = Path(__file__).resolve().parent / "cartPole_n-stepReturnA2C_plots"
-    plot_evaluation_rewards(episode_rewards, config, agent, output_dir)
+    plot_training_rewards(training_returns, config, agent, output_dir, window=config.moving_avg_window)
+    plot_evaluation_rewards(test_rewards, config, agent, output_dir)
 
 
 
