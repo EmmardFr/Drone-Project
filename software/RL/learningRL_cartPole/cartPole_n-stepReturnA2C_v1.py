@@ -8,6 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from dataclasses import dataclass, fields
 import copy
+import random
 
 
 ALGORITHM = "n-step actor-critic, 1 update per episode (all its transitions)"
@@ -21,13 +22,20 @@ class Config:
     discount_factor: float = 0.95
     entropy_coef: float = 0.001
     n_steps: int = 10
-    training_episodes: int = 1000
+    training_episodes: int = 200
     evaluation_episodes: int = 20   # per action-selection mode, without rendering
     render_episodes: int = 1        # watched episodes after evaluation (0 = none)
     max_grad_norm: float = 0.5
     moving_avg_window: int = 50
     print_every: int = 50
+    seeds: tuple[int, ...] = (0, 1, 2)
 
+
+def set_seed(seed: int) -> None:
+    """Make network init, PyTorch sampling and NumPy reproducible."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
 
 class CartPoleAgent:
     def __init__(self,
@@ -81,8 +89,8 @@ class CartPoleAgent:
                 action = Categorical(logits=logits).sample()
         return action
 
-    def collect_episode(self, env: gym.Env):
-        obs, info = env.reset()
+    def collect_episode(self, env: gym.Env, seed: int | None = None):
+        obs, info = env.reset(seed=seed)
 
         states       = []
         next_states  = []
@@ -139,7 +147,7 @@ class CartPoleAgent:
         self.critic_optimizer.step()
 
 
-    def train(self, env: gym.Env, nb_episodes: int, n_steps: int, window: int, print_every: int) -> list[float]:
+    def train(self, env: gym.Env, nb_episodes: int, n_steps: int, window: int, print_every: int, seed: int | None = None) -> list[float]:
         episode_returns = []
 
         self.best_moving_avg = -float("inf")
@@ -147,7 +155,7 @@ class CartPoleAgent:
         self.best_episode = None
 
         for episode in range(nb_episodes):
-            states, next_states, actions, rewards, terminations = self.collect_episode(env)
+            states, next_states, actions, rewards, terminations = self.collect_episode(env, seed=seed if episode == 0 else None)
 
             self.update(n_steps, states, next_states, actions, rewards, terminations)
 
@@ -169,11 +177,11 @@ class CartPoleAgent:
 
         return episode_returns
 
-    def evaluate(self, env: gym.Env, nb_episodes: int, deterministic: bool = False) -> list[float]:
+    def evaluate(self, env: gym.Env, nb_episodes: int, deterministic: bool = False, seed: int | None = None) -> list[float]:
         rewards = []
 
         for episode in range(nb_episodes):
-            obs, info = env.reset()
+            obs, info = env.reset(seed=seed if episode == 0 else None)
 
             episode_reward = 0
 
@@ -338,7 +346,8 @@ def plot_evaluation_rewards(
             ylabel="Total reward",
             ylim=(0, 525),
         )
-        ax.set_xticks(np.arange(1, max_episodes + 1))
+        if max_episodes <= 25:
+            ax.set_xticks(np.arange(1, max_episodes + 1))
         ax.grid(alpha=0.3)
         ax.legend(loc="lower left")
 
@@ -361,85 +370,63 @@ def plot_evaluation_rewards(
     return output_path
 
 
+def moving_average(values: list[float], window: int) -> np.ndarray:
+    return np.convolve(np.asarray(values, dtype=float), np.ones(window) / window, mode="valid")
+
+
 def plot_training_rewards(
-    episode_returns: list[float],
+    returns_per_seed: dict[int, list[float]],
     config: Config,
     agent: CartPoleAgent,
     output_path: Path,
     window: int,
 ) -> Path:
-    """Save and display the return of every training episode, with a moving average."""
-    if not episode_returns:
-        raise ValueError("episode_returns must not be empty")
+    """Moving average of the training return for each seed, with mean ± std across seeds."""
+    if not returns_per_seed:
+        raise ValueError("returns_per_seed must not be empty")
 
-    returns = np.asarray(episode_returns, dtype=float)
-    episodes = np.arange(1, len(returns) + 1)
+    n_episodes = len(next(iter(returns_per_seed.values())))
+    if n_episodes < window:
+        raise ValueError(f"Need at least {window} episodes for the moving average")
 
-    summary = "\n".join([
-        "TRAINING",
-        f"Episodes: {config.training_episodes}",
-        f"Actor lr: {agent.actor_lr:g}",
-        f"Critic lr: {agent.critic_lr:g}",
-        f"Discount factor: {agent.discount_factor:g}",
-        f"Return horizon: {config.n_steps} steps",
-        f"Entropy coefficient: {agent.entropy_coef:g}",
-        f"Actor: {describe_network(agent.actor)}",
-        f"Critic: {describe_network(agent.critic)}",
+    curves = np.array([moving_average(r, window) for r in returns_per_seed.values()])
+    mean = curves.mean(axis=0)
+    std = curves.std(axis=0)
+    x = np.arange(window, n_episodes + 1)   # each average covers the episodes before it
+
+    best = int(mean.argmax())
+    text = "\n".join(describe_config(config, agent) + [
         "",
-        f"Last {min(window, len(returns))} ep. mean: {returns[-window:].mean():.1f}",
-        f"Best episode: {returns.max():.0f}",
+        f"RESULTS ({len(returns_per_seed)} seeds, moving average)",
+        f"Final: {mean[-1]:.1f} ± {std[-1]:.1f}",
+        f"Best mean: {mean[best]:.1f} ± {std[best]:.1f} (ep. {x[best]})",
     ])
 
     fig, ax = plt.subplots(figsize=(13, 7))
 
     try:
-        fig.subplots_adjust(right=0.70)
+        fig.subplots_adjust(right=0.63)
 
-        ax.plot(
-            episodes,
-            returns,
-            color="tab:blue",
-            alpha=0.35,
-            linewidth=1,
-            label="Episode return",
-        )
+        for seed, curve in zip(returns_per_seed, curves):
+            ax.plot(x, curve, linewidth=1, alpha=0.5, label=f"Seed {seed}")
 
-        if len(returns) >= window:
-            moving_avg = np.convolve(returns, np.ones(window) / window, mode="valid")
-            ax.plot(
-                episodes[window - 1:],
-                moving_avg,
-                color="tab:blue",
-                linewidth=2,
-                label=f"Moving average ({window} episodes)",
-            )
+        ax.plot(x, mean, color="black", linewidth=2.5, label=f"Mean of {len(curves)} seeds")
+        ax.fill_between(x, mean - std, mean + std, color="gray", alpha=0.25, label="± 1 std")
 
-        ax.axhline(
-            500,
-            color="tab:green",
-            linestyle=":",
-            label="Max return (500)",
-        )
+        ax.axhline(500, color="tab:green", linestyle=":", label="Max return (500)")
 
         ax.set(
-            title="CartPole — training episode returns",
+            title=f"{config.env_id} — training return ({window}-episode moving average)",
             xlabel="Training episode",
             ylabel="Total reward",
             ylim=(0, 525),
-            xlim=(1, len(returns)),
+            xlim=(1, n_episodes),
         )
         ax.grid(alpha=0.3)
         ax.legend(loc="upper left")
 
-        fig.text(
-            0.73, 0.94,
-            summary,
-            va="top",
-            ha="left",
-            fontsize=9,
-            fontfamily="monospace",
-            linespacing=1.4,
-        )
+        fig.text(0.67, 0.94, text, va="top", ha="left",
+                 fontsize=9, fontfamily="monospace", linespacing=1.4)
 
         fig.savefig(output_path, dpi=200, bbox_inches="tight")
         print(f"Plot saved to: {output_path}")
@@ -454,8 +441,8 @@ def plot_training_rewards(
 ##################################### MAIN ######################################
 #################################################################################
 
-def main():
-    config = Config()
+def train_one_seed(config: Config, seed: int) -> tuple[CartPoleAgent, list[float]]:
+    set_seed(seed)   # before creating the agent: network weights depend on it
 
     agent = CartPoleAgent(
         actor_learning_rate=config.actor_learning_rate,
@@ -473,6 +460,7 @@ def main():
             n_steps=config.n_steps,
             window=config.moving_avg_window,
             print_every=config.print_every,
+            seed=seed,
         )
     finally:
         env.close()
@@ -484,28 +472,54 @@ def main():
             f"(moving average {agent.best_moving_avg:.1f})"
         )
 
-    # Evaluation without rendering (fast), in both action-selection modes
-    eval_env = gym.make(config.env_id)
-    try:
-        eval_rewards = {
-            "Stochastic (sampling)": agent.evaluate(
-                eval_env, nb_episodes=config.evaluation_episodes, deterministic=False,
-            ),
-            "Deterministic (argmax)": agent.evaluate(
-                eval_env, nb_episodes=config.evaluation_episodes, deterministic=True,
-            ),
-        }
-    finally:
-        eval_env.close()
+    return agent, training_returns
 
-    for mode, rewards in eval_rewards.items():
-        print(f"{mode}: mean evaluation return {np.mean(rewards):.1f}")
 
-    # A few rendered episodes, just to watch the policy
+def main():
+    config = Config()
+
+    modes = {"Stochastic (sampling)": False, "Deterministic (argmax)": True}
+
+    agents: dict[int, CartPoleAgent] = {}
+    training_returns: dict[int, list[float]] = {}
+    eval_rewards: dict[str, list[float]] = {mode: [] for mode in modes}
+    eval_means: dict[str, list[float]] = {mode: [] for mode in modes}
+
+    for seed in config.seeds:
+        print(f"\n===== Seed {seed} =====")
+        agent, returns = train_one_seed(config, seed)
+        agents[seed] = agent
+        training_returns[seed] = returns
+
+        # Evaluation without rendering; a different seed than training
+        eval_env = gym.make(config.env_id)
+        try:
+            for mode, deterministic in modes.items():
+                rewards = agent.evaluate(
+                    eval_env,
+                    nb_episodes=config.evaluation_episodes,
+                    deterministic=deterministic,
+                    seed=seed + 10_000,
+                )
+                eval_rewards[mode].extend(rewards)
+                eval_means[mode].append(np.mean(rewards))
+                print(f"{mode}: mean evaluation return {np.mean(rewards):.1f}")
+        finally:
+            eval_env.close()
+
+    print(f"\n===== Summary over {len(config.seeds)} seeds =====")
+    for mode, means in eval_means.items():
+        print(f"{mode}: {np.mean(means):.1f} ± {np.std(means):.1f}")
+
+    # Watch the seed whose training reached the best moving average
     if config.render_episodes > 0:
+        best_seed = max(agents, key=lambda s: agents[s].best_moving_avg)
+        print(f"Rendering seed {best_seed}")
         render_env = gym.make(config.env_id, render_mode="human")
         try:
-            agent.evaluate(render_env, nb_episodes=config.render_episodes, deterministic=True)
+            agents[best_seed].evaluate(
+                render_env, nb_episodes=config.render_episodes, deterministic=True,
+            )
         finally:
             render_env.close()
 
@@ -513,16 +527,16 @@ def main():
     plots_dir = Path(__file__).resolve().parent / "cartPole_n-stepReturnA2C_plots"
     run_dir, run_index = create_run_dir(plots_dir)
 
+    any_agent = next(iter(agents.values()))   # only used for the network description
     plot_training_rewards(
-        training_returns, config, agent,
+        training_returns, config, any_agent,
         output_path=run_dir / f"training_rewards_{run_index:04d}.png",
         window=config.moving_avg_window,
     )
     plot_evaluation_rewards(
-        eval_rewards, config, agent,
+        eval_rewards, config, any_agent,
         output_path=run_dir / f"evaluation_rewards_{run_index:04d}.png",
     )
-
 
 
 if __name__ == "__main__":
