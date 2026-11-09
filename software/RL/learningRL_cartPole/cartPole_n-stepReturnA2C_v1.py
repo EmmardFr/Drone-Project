@@ -203,26 +203,26 @@ def compute_n_step_returns(rewards: torch.Tensor, next_values: torch.Tensor, ter
 
     All input tensors have shape [L].
     No episode reset may occur inside the sequence.
+    Vectorized over t: n_steps operations on whole tensors instead of L × n_steps scalar ones.
     """
     if n_steps < 1:
         raise ValueError("n_steps must be at least 1")
 
     with torch.no_grad():
-        targets = torch.zeros_like(rewards)
         length = len(rewards)
+        targets = torch.zeros_like(rewards)
 
-        for t in range(length):
-            m = min(n_steps, length - t)
+        # Sum the rewards actually observed: for each k, add gamma^k * r[t+k] to every t at once.
+        # Slicing stops automatically at the end of the episode (that's the min(n_steps, L - t)).
+        for k in range(min(n_steps, length)):
+            targets[:length - k] += gamma**k * rewards[k:]
 
-            # Sum the rewards actually observed.
-            for k in range(m):
-                targets[t] += gamma**k * rewards[t + k]
-
-            # Index of the transition leading to the bootstrap state.
-            last = t + m - 1
-
-            if not terminations[last].item():
-                targets[t] += gamma**m * next_values[last]
+        # Bootstrap from the critic at the last transition of each window, unless it terminated.
+        t = torch.arange(length)
+        last = torch.clamp(t + n_steps, max=length) - 1      # index of the transition leading to the bootstrap state
+        m = last - t + 1                                     # number of rewards actually summed
+        not_terminal = (~terminations[last]).float()
+        targets += (gamma ** m.float()) * next_values[last] * not_terminal
 
     return targets
 
