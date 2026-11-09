@@ -16,7 +16,8 @@ ALGORITHM = "n-step actor-critic, 1 update per episode (all its transitions)"
 @dataclass
 class Config:
     env_id: str = "CartPole-v1"
-    actor_learning_rate: float = 0.001
+    actor_learning_rate: float = 0.002
+    actor_lr_end_factor: float = 0.1   # final lr = actor_learning_rate × this (1.0 = no decay)
     critic_learning_rate: float = 0.005
     discount_factor: float = 0.95
     entropy_coef: float = 0.001
@@ -35,6 +36,7 @@ class CartPoleAgent:
                  critic_learning_rate: float,
                  entropy_coef: float,
                  max_grad_norm: float,
+                 actor_lr_end_factor: float,
                  discount_factor: float = 0.95,
                  ):
         """Initialize an n-step actor-critic agent.
@@ -51,6 +53,7 @@ class CartPoleAgent:
         self.discount_factor = discount_factor
         self.entropy_coef = entropy_coef
         self.max_grad_norm = max_grad_norm
+        self.actor_lr_end_factor = actor_lr_end_factor
 
         self.actor = nn.Sequential(
             nn.Linear(4, 64),   # CartPole has 4 observation features
@@ -132,6 +135,7 @@ class CartPoleAgent:
         actor_loss.backward()
         nn.utils.clip_grad_norm_(self.actor.parameters(), max_norm=self.max_grad_norm)
         self.actor_optimizer.step()
+        self.actor_scheduler.step()
 
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
@@ -145,6 +149,8 @@ class CartPoleAgent:
         self.best_moving_avg = -float("inf")
         self.best_actor_state = None
         self.best_episode = None
+
+        self.actor_scheduler = torch.optim.lr_scheduler.LinearLR(self.actor_optimizer, start_factor=1.0, end_factor=self.actor_lr_end_factor, total_iters=nb_episodes,)
 
         for episode in range(nb_episodes):
             states, next_states, actions, rewards, terminations = self.collect_episode(env)
@@ -463,6 +469,7 @@ def main():
         discount_factor=config.discount_factor,
         entropy_coef=config.entropy_coef,
         max_grad_norm=config.max_grad_norm,
+        actor_lr_end_factor=config.actor_lr_end_factor,
     )
 
     env = gym.make(config.env_id)
