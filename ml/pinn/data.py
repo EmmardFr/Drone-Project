@@ -60,22 +60,22 @@ MIX = {
 # ============================================================
 
 def find_log_dir(start=None):
-    """Locate software/sample-flight-logs without hardcoding a path."""
+    """Locate data/sample_flight_logs without hardcoding a path."""
 
     here = Path(start or Path(__file__).parent).resolve()
 
-    sibling = here.parent / "sample-flight-logs"
+    sibling = here.parents[1] / "data" / "sample_flight_logs"
 
     if sibling.is_dir():
         return sibling
 
     for p in [here, *here.parents]:
-        candidate = p / "software" / "sample-flight-logs"
+        candidate = p / "data" / "sample_flight_logs"
 
         if candidate.is_dir():
             return candidate
 
-    raise FileNotFoundError("sample-flight-logs not found")
+    raise FileNotFoundError("data/sample_flight_logs not found")
 
 
 # ============================================================

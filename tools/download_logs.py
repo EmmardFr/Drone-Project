@@ -18,9 +18,8 @@ from pathlib import Path
 SERIAL_PORT = "COM4"
 BAUDRATE = 115200
 
-LOCAL_DIR = Path(
-    "C:/Users/zorba/Documents/DroneProject/code/software/logs"
-)
+# Raw logs go to <repo>/data/logs (git-ignored)
+LOCAL_DIR = Path(__file__).resolve().parents[1] / "data" / "logs"
 
 LOCAL_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -16,11 +16,11 @@ import numpy as np
 
 filename = "logs0337"
 
-input_file = Path(
-    f"C:/Users/zorba/Documents/DroneProject/code/software/logs/{filename}.csv"
-)
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
-output_dir = Path("Teensy Dev Gyro Plots")
+input_file = REPO_ROOT / "data" / "logs" / f"{filename}.csv"
+
+output_dir = REPO_ROOT / "data" / "plots"
 output_dir.mkdir(parents=True, exist_ok=True)
 
 

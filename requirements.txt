@@ -1,0 +1,14 @@
+# Python dependencies for tools/ and ml/
+# Install: python -m pip install -r requirements.txt
+
+# Log download / analysis (tools/)
+pyserial>=3.5
+numpy>=1.26
+pandas>=2.1
+matplotlib>=3.8
+scipy>=1.11
+
+# Machine learning (ml/)
+torch>=2.2
+gymnasium>=0.29
+tqdm>=4.66
