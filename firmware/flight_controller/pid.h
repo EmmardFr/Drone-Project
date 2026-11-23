@@ -1,7 +1,7 @@
 // #define ROLLING_WINDOW_SIZE 256
 
 #define ROLLING_WINDOW_SIZE 0
-#define I_LIMIT 25.0f
+#define I_LIMIT 15.0f
 
 struct PID_AXIS{
   float roll;
@@ -33,9 +33,14 @@ struct ROLLING_WINDOW{
   float yaw[ROLLING_WINDOW_SIZE];
 };
 
-constexpr PID roll_coeff  = {0.80, 3.50, 0.0001};
-constexpr PID pitch_coeff = {0.80, 3.50, 0.0001};
-constexpr PID yaw_coeff   = {0.80, 5.00, 0.0001};
+// constexpr PID roll_coeff  = {1.00, 4.00, 0.00};
+// constexpr PID pitch_coeff = {1.00, 4.00, 0.00};
+// constexpr PID yaw_coeff   = {1.00, 4.00, 0.00};
+
+constexpr PID roll_coeff  = {1.00, 0.00, 0.00};
+constexpr PID pitch_coeff = {1.00, 0.00, 0.00};
+constexpr PID yaw_coeff   = {1.00, 0.00, 0.00};
+
 
 constexpr float dt = 0.001;
 

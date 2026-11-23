@@ -121,7 +121,7 @@ void loop()
     sendThrottle(motor_power.motor4, MOTOR_PIN4);
   }
 
-  // loopSD(filteredGyro, motor_power);
+  loopSD(filteredGyro, motor_power);
 
   // static uint32_t t = micros();
   // uint32_t dt = micros() - t;
