@@ -12,11 +12,8 @@ void stopProgram()
 
     if (c == 'q')
     {
-      logFileIMU.flush();
-      logFileIMU.close();
-
-      logFileRX.flush();
-      logFileRX.close();
+      logFile.flush();
+      logFile.close();
 
       while(1);
     }
@@ -39,10 +36,8 @@ void setup()
   // SD card setup
   setupSD();
 
-  // Gyro setup
+  // Rx setup
   setupRx();
-
-  float x = 54.2;
 }
 
 void loop()
@@ -53,13 +48,7 @@ void loop()
   if(readSBUS())
   {
     decodeSBUS(frame);
-    printRx(0);
-
-    // uint32_t t = micros();
-    // loopSD_RX(rx);
-    // uint32_t dt = micros() - t;
-    // Serial.print("dt_Gy ");
-    // Serial.println(dt);
+    printRx(1);
 
     // static uint32_t t_rx = micros();
     // uint32_t dt_rx = micros() - t_rx;
@@ -83,13 +72,9 @@ void loop()
   Gyro raw = readGyro();
   Gyro filteredGyro = filterGyro(raw);
 
-  uint32_t t = micros();
-  loopSD_IMU(filteredGyro);;
-  uint32_t dt = micros() - t;
-  Serial.print("dt_IMU ");
-  Serial.println(dt);
+  loopSD(filteredGyro);
 
-  printGyro(0, filteredGyro);
+  printGyro(1, filteredGyro);
 
   // static uint32_t t_gy = micros();
   // uint32_t dt_gy = micros() - t_gy;
@@ -101,9 +86,3 @@ void loop()
   // and flush the data in the sd card
   stopProgram();
 }
-
-
-
-
-
-

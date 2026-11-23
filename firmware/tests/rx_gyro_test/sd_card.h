@@ -1,22 +1,22 @@
 #include <SD.h>
 
-File logFileIMU;
-File logFileRX;
-uint32_t logStartUs = 0;
+File logFile;
 
-bool createLogFilesNames(char filenameIMU[20], char filenameRX[20])
+String createLogFileName()
 {
+    char filename[20];
+
     for (int i = 0; i < 10000; i++)
     {
-        sprintf(filenameIMU, "gyro%04d.csv", i);
-        sprintf(filenameRX, "rx%04d.csv", i);
+        sprintf(filename, "gyro%04d.csv", i);
 
-        if (!SD.exists(filenameIMU) && !SD.exists(filenameRX))
+        if (!SD.exists(filename))
         {
-            return 1;
+            return String(filename);
         }
     }
-    return 0;
+
+    return "";
 }
 
 
@@ -27,117 +27,36 @@ void setupSD()
         while (1);
     }
 
-    char filenameIMU[20];
-    char filenameRX[20];
-    if (!createLogFilesNames(filenameIMU, filenameRX))
-    {
-        Serial.println("No free filename found");
-        while(1);
-    }
-    logFileIMU = SD.open(filenameIMU, FILE_WRITE);
-    logFileRX = SD.open(filenameRX, FILE_WRITE);
+    String filename = createLogFileName();
+    logFile = SD.open(filename.c_str(), FILE_WRITE);
 
-    if (!logFileIMU || !logFileRX) {
+    if (!logFile) {
         Serial.println("Failed to open file");
-        while(1);
+        while (1);
     }
 
-    logFileIMU.println("time_us,gyroX,gyroY,gyroZ");
-    logFileIMU.flush();
-
-    // logFileRX.println("time_us,throttle,roll,pitch,yaw,armSwitch,switch2,switch3,switch4,switch5,switch6,pot1,pot2,ch13,ch14,ch15,ch16,frameLost,failsafe");
-    logFileRX.println("time_us,throttle,roll,pitch,yaw");
-    logFileRX.flush();
-
-    logStartUs = micros();
+    logFile.println("time_us,gyroX,gyroY,gyroZ,rx_throttle,rx_roll,rx_pitch,rx_yaw");
+    logFile.flush();
 }
 
-void loopSD_IMU(Gyro gyro)
+void loopSD(Gyro gyro)
 {
-    uint32_t t = micros() - logStartUs;
+    static uint32_t t0_us = micros();
+    uint32_t t = micros() - t0_us;
 
-    // logFileIMU.println(t+","+String(gyro.x)+","+String(gyro.y)+","+String(gyro.z));
+    logFile.print(t);
+    logFile.print(",");
+    logFile.print(gyro.x);
+    logFile.print(",");
+    logFile.print(gyro.y);
+    logFile.print(",");
+    logFile.println(gyro.z);
 
-    // logFileIMU.print(t);
-    // logFileIMU.print(",");
-    // logFileIMU.print(gyro.x);
-    // logFileIMU.print(",");
-    // logFileIMU.print(gyro.y);
-    // logFileIMU.print(",");
-    // logFileIMU.println(gyro.z);
-
-    logFileIMU.print(t);
-    logFileIMU.print(",");
-    logFileIMU.print(gyro.x);
-    logFileIMU.print(",");
-    logFileIMU.print(gyro.y);
-    logFileIMU.print(",");
-    logFileIMU.print(gyro.z);
-
-    logFileIMU.print(t);
-    logFileIMU.print(",");
-    logFileIMU.print(rx.throttle);
-    logFileIMU.print(",");
-    logFileIMU.print(rx.roll);
-    logFileIMU.print(",");
-    logFileIMU.print(rx.pitch);
-    logFileIMU.print(",");
-    logFileIMU.println(rx.yaw);
-}
-
-void loopSD_RX(RCChannels rx)
-{
-    uint32_t t = micros() - logStartUs;
-    
-    logFileRX.print(t);
-    logFileRX.print(",");
-    logFileRX.print(rx.throttle);
-    logFileRX.print(",");
-    logFileRX.print(rx.roll);
-    logFileRX.print(",");
-    logFileRX.print(rx.pitch);
-    logFileRX.print(",");
-    logFileRX.println(rx.yaw);
-
-    // logFileRX.print(t);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.throttle);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.roll);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.pitch);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.yaw);
-
-    // logFileRX.print(",");
-    // logFileRX.print(rx.armSwitch);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.switch2);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.switch3);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.switch4);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.switch5);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.switch6);
-
-    // logFileRX.print(",");
-    // logFileRX.print(rx.pot1);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.pot2);
-
-    // logFileRX.print(",");
-    // logFileRX.print(rx.ch13);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.ch14);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.ch15);
-    // logFileRX.print(",");
-    // logFileRX.print(rx.ch16);
-
-    // logFileRX.print(",");
-    // logFileRX.print(rx.frameLost);
-    // logFileRX.print(",");
-    // logFileRX.println(rx.failsafe);
+    logFile.print(rx.throttle);
+    logFile.print(",");
+    logFile.print(rx.roll);
+    logFile.print(",");
+    logFile.print(rx.pitch);
+    logFile.print(",");
+    logFile.println(rx.yaw);
 }
