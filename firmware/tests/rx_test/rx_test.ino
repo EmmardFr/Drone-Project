@@ -2,15 +2,20 @@ uint8_t frame[25];
 
 bool readSBUS()
 {
-  while(Serial1.available() >= 25)
+  while (Serial1.available())
   {
-    Serial1.readBytes(&frame[0], 25);
+    uint8_t b = Serial1.read();
 
-    if(frame[0] != 0x0F || frame[24] != 0x00)
-    {
-      Serial.println("No good bytes");
+    if (b != 0x0F)
       continue;
-    }
+
+    frame[0] = b;
+
+    if (Serial1.readBytes(&frame[1], 24) != 24)
+      return false;
+  
+    if (frame[24] != 0x00)
+      continue;
 
     return true;
   }
