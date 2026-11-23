@@ -6,22 +6,23 @@ void setup()
 
 void loop()
 {
-  static int count = 0;
-
-  while (Serial1.available())
+  while(Serial1.available() >= 25)
   {
-    uint8_t b = Serial1.read(); 
+    uint8_t frame[25];
+    size_t n = Serial1.readBytes(&frame[0], 25);
 
-    if (b < 16) Serial.print('0');
-    Serial.print(b, HEX);
-    Serial.print(' ');
-
-    count++;
-
-    if (count == 25)
+    if(frame[0] != 0x0F || frame[24] != 0x00)
     {
-      Serial.println();
-      count = 0;
+      Serial.println("No good bytes");
+      continue;
     }
+
+    for(uint8_t i = 0; i < 25; ++i)
+    {
+      Serial.print(frame[i], HEX);
+      Serial.print(' ');
+    }
+    Serial.println();
   }
+  // Serial.println("No Serial1");
 }
