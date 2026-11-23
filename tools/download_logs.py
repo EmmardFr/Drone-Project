@@ -1,5 +1,9 @@
+# ============================================================
+# download_logs.py
+# ============================================================
+
 # Requires: pip install pyserial
-# take binary files as input (arduino code v3, v7)
+# take binary files as input (arduino code v3, v7, v8, v9, v10)
 
 import serial
 import struct
@@ -11,7 +15,7 @@ from pathlib import Path
 # Configuration
 # ============================================================
 
-SERIAL_PORT = "COM4"       # Change this to your Teensy COM port
+SERIAL_PORT = "COM4"
 BAUDRATE = 115200
 
 LOCAL_DIR = Path(
@@ -22,7 +26,7 @@ LOCAL_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ============================================================
-# Binary file format
+# Binary format
 # ============================================================
 
 GAINS_FORMAT = "<9f"
@@ -31,17 +35,21 @@ GAINS_SIZE = struct.calcsize(GAINS_FORMAT)
 # C++ LogRecord:
 #
 # uint32_t time_us
-# 7 x float
-# 3 x uint8_t
+# float dt
+# 7 floats
+# 3 uint8_t
 # 1 byte padding
-# 9 x float
+# 9 floats
 #
-RECORD_FORMAT = "<I7f3B x9f"
+# Total: 76 bytes
+#
+RECORD_FORMAT = "<If7f3B x9f"
 RECORD_SIZE = struct.calcsize(RECORD_FORMAT)
 
 
 CSV_HEADER = [
     "time_us",
+    "dt",
     "gyroRoll",
     "gyroPitch",
     "gyroYaw",
@@ -61,14 +69,20 @@ CSV_HEADER = [
     "pYaw",
     "iYaw",
     "dYaw",
-    "roll_coeff_p", "roll_coeff_i", "roll_coeff_d",
-    "pitch_coeff_p", "pitch_coeff_i", "pitch_coeff_d",
-    "yaw_coeff_p", "yaw_coeff_i", "yaw_coeff_d"
+    "roll_coeff_p",
+    "roll_coeff_i",
+    "roll_coeff_d",
+    "pitch_coeff_p",
+    "pitch_coeff_i",
+    "pitch_coeff_d",
+    "yaw_coeff_p",
+    "yaw_coeff_i",
+    "yaw_coeff_d",
 ]
 
 
 # ============================================================
-# Decode one binary file into CSV
+# Convert binary file to CSV
 # ============================================================
 
 def convert_bin_to_csv(bin_file):
@@ -83,7 +97,10 @@ def convert_bin_to_csv(bin_file):
         # Read ASCII column header
         # ----------------------------------------------------
 
-        header = f.readline().decode("ascii").strip()
+        header = f.readline().decode(
+            "ascii",
+            errors="strict"
+        ).strip()
 
         # ----------------------------------------------------
         # Read PID gains
@@ -93,10 +110,9 @@ def convert_bin_to_csv(bin_file):
 
         if len(gains_data) != GAINS_SIZE:
             raise RuntimeError(
-                f"{bin_file.name}: incomplete PID gains header"
+                f"{bin_file.name}: "
+                f"incomplete PID gains header"
             )
-
-        gains = struct.unpack(GAINS_FORMAT, gains_data)
 
         (
             roll_p,
@@ -108,21 +124,30 @@ def convert_bin_to_csv(bin_file):
             yaw_p,
             yaw_i,
             yaw_d,
-        ) = gains
-
-        print(
-            f"  Roll PID:  P={roll_p:.4f}, "
-            f"I={roll_i:.4f}, D={roll_d:.4f}"
+        ) = struct.unpack(
+            GAINS_FORMAT,
+            gains_data
         )
 
         print(
-            f"  Pitch PID: P={pitch_p:.4f}, "
-            f"I={pitch_i:.4f}, D={pitch_d:.4f}"
+            f"  Roll PID:  "
+            f"P={roll_p:.4f}, "
+            f"I={roll_i:.4f}, "
+            f"D={roll_d:.4f}"
         )
 
         print(
-            f"  Yaw PID:   P={yaw_p:.4f}, "
-            f"I={yaw_i:.4f}, D={yaw_d:.4f}"
+            f"  Pitch PID: "
+            f"P={pitch_p:.4f}, "
+            f"I={pitch_i:.4f}, "
+            f"D={pitch_d:.4f}"
+        )
+
+        print(
+            f"  Yaw PID:   "
+            f"P={yaw_p:.4f}, "
+            f"I={yaw_i:.4f}, "
+            f"D={yaw_d:.4f}"
         )
 
         # ----------------------------------------------------
@@ -131,7 +156,11 @@ def convert_bin_to_csv(bin_file):
 
         record_count = 0
 
-        with open(csv_file, "w", newline="") as csv_out:
+        with open(
+            csv_file,
+            "w",
+            newline=""
+        ) as csv_out:
 
             writer = csv.writer(csv_out)
 
@@ -145,16 +174,20 @@ def convert_bin_to_csv(bin_file):
                     break
 
                 if len(data) != RECORD_SIZE:
-                    print(
-                        f"  WARNING: incomplete record at end "
-                        f"of {bin_file.name}"
+                    raise RuntimeError(
+                        f"{bin_file.name}: "
+                        f"incomplete final record: "
+                        f"{len(data)} / {RECORD_SIZE} bytes"
                     )
-                    break
 
-                values = struct.unpack(RECORD_FORMAT, data)
+                values = struct.unpack(
+                    RECORD_FORMAT,
+                    data
+                )
 
                 (
                     time_us,
+                    dt,
 
                     gyroRoll,
                     gyroPitch,
@@ -184,6 +217,7 @@ def convert_bin_to_csv(bin_file):
 
                 writer.writerow([
                     time_us,
+                    dt,
 
                     gyroRoll,
                     gyroPitch,
@@ -210,7 +244,7 @@ def convert_bin_to_csv(bin_file):
                     iYaw,
                     dYaw,
 
-                    # PID gains stored in the binary file header
+                    # PID gains
                     roll_p,
                     roll_i,
                     roll_d,
@@ -230,21 +264,20 @@ def convert_bin_to_csv(bin_file):
 
 
 # ============================================================
-# Download one file from Teensy
+# Download one binary file
 # ============================================================
 
 def download_file(ser, filename, file_size):
 
     local_bin = LOCAL_DIR / filename
 
-    print(f"Downloading {filename} ({file_size} bytes)...")
+    print(
+        f"Downloading {filename} "
+        f"({file_size:,} bytes)..."
+    )
 
-    # Tell Teensy that we want the file
     ser.write(b"R")
-
-    # --------------------------------------------------------
-    # Receive exactly file_size bytes
-    # --------------------------------------------------------
+    ser.flush()
 
     remaining = file_size
 
@@ -252,28 +285,49 @@ def download_file(ser, filename, file_size):
 
         while remaining > 0:
 
-            chunk = ser.read(min(4096, remaining))
+            chunk = ser.read(
+                min(4096, remaining)
+            )
 
             if not chunk:
                 raise RuntimeError(
-                    f"Timeout while downloading {filename}"
+                    f"Timeout while downloading "
+                    f"{filename}. "
+                    f"Remaining: {remaining} bytes."
                 )
 
             f.write(chunk)
             remaining -= len(chunk)
 
     # --------------------------------------------------------
-    # Teensy sends END after the binary data
+    # Read END marker
     # --------------------------------------------------------
 
     end = ser.read_until(b"\n")
 
     if end != b"END\n":
         raise RuntimeError(
-            f"Unexpected end marker for {filename}: {end!r}"
+            f"Unexpected end marker for "
+            f"{filename}: {end!r}"
         )
 
-    print(f"  Saved: {local_bin}")
+    # --------------------------------------------------------
+    # Verify size
+    # --------------------------------------------------------
+
+    actual_size = local_bin.stat().st_size
+
+    if actual_size != file_size:
+        raise RuntimeError(
+            f"Size mismatch for {filename}: "
+            f"expected {file_size}, "
+            f"received {actual_size}"
+        )
+
+    print(
+        f"  Saved: {local_bin} "
+        f"({actual_size:,} bytes)"
+    )
 
     return local_bin
 
@@ -295,17 +349,15 @@ def download_all_files():
         timeout=2
     ) as ser:
 
-        # Give the serial connection a moment to stabilize
         ser.reset_input_buffer()
         ser.reset_output_buffer()
 
         # ----------------------------------------------------
-        # Send download command
+        # Ask Teensy to start file download
         # ----------------------------------------------------
 
-        # Your Teensy code expects:
-        # 'd' -> downloadAllFiles()
         ser.write(b"d")
+        ser.flush()
 
         print("Waiting for file list...")
         print()
@@ -342,9 +394,9 @@ def download_all_files():
 
                 local_bin = LOCAL_DIR / filename
 
-                # --------------------------------------------
-                # Already downloaded?
-                # --------------------------------------------
+                # ------------------------------------------------
+                # Skip if already downloaded and size matches
+                # ------------------------------------------------
 
                 if local_bin.exists():
 
@@ -358,11 +410,13 @@ def download_all_files():
                         )
 
                         ser.write(b"S")
+                        ser.flush()
+
                         continue
 
-                # --------------------------------------------
+                # ------------------------------------------------
                 # Download
-                # --------------------------------------------
+                # ------------------------------------------------
 
                 bin_file = download_file(
                     ser,
@@ -370,16 +424,16 @@ def download_all_files():
                     file_size
                 )
 
-                # --------------------------------------------
-                # Convert immediately to CSV
-                # --------------------------------------------
+                # ------------------------------------------------
+                # Convert immediately
+                # ------------------------------------------------
 
                 convert_bin_to_csv(bin_file)
 
                 print()
 
             # ------------------------------------------------
-            # All files completed
+            # Done
             # ------------------------------------------------
 
             elif line == "DONE":
@@ -388,6 +442,7 @@ def download_all_files():
                 print("============================================================")
                 print("DOWNLOAD COMPLETE")
                 print("============================================================")
+
                 break
 
             else:
