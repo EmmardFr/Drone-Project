@@ -1,26 +1,29 @@
+int countSBUS = 0;
+int countTot = 0;
+
 struct RCChannels {
-    float throttle;
-    float roll;
-    float pitch;
-    float yaw;
+  float throttle;
+  float roll;
+  float pitch;
+  float yaw;
 
-    int armSwitch;
-    int switch2;
-    int switch3;
-    int switch4;
-    int switch5;
-    int switch6;
+  int armSwitch;
+  int switch2;
+  int switch3;
+  int switch4;
+  int switch5;
+  int switch6;
 
-    float pot1;
-    float pot2;
+  float pot1;
+  float pot2;
 
-    float ch13;
-    float ch14;
-    float ch15;
-    float ch16;
+  float ch13;
+  float ch14;
+  float ch15;
+  float ch16;
 
-    bool frameLost;
-    bool failsafe;
+  bool frameLost;
+  bool failsafe;
 };
 
 RCChannels rx;
@@ -29,23 +32,26 @@ uint8_t frame[25];
 
 bool readSBUS()
 {
-  while (Serial1.available())
+  static uint8_t idx = 0;
+
+  while(Serial1.available())
   {
     uint8_t b = Serial1.read();
 
-    if (b != 0x0F)
+    if(idx == 0 && b != 0x0F)
       continue;
 
-    frame[0] = b;
+    frame[idx++] = b;
 
-    if (Serial1.readBytes(&frame[1], 24) != 24)
-      return false;
-  
-    if (frame[24] != 0x00)
-      continue;
+    if(idx == 25)
+    {
+      idx = 0;
 
-    return true;
+      if(frame[24] == 0x00)
+        return true;
+    }
   }
+
   return false;
 }
 
@@ -92,30 +98,10 @@ void normalizeChannels()
   rx.switch6    = (rx.switch6 > 1500) ? 1 : ((rx.switch6 < 500) ? -1 : 0);
 }
 
-
-void setup()
+void printRx(bool doIt)
 {
-  Serial.begin(115200);
-  Serial1.begin(100000, SERIAL_8E2_RXINV);
-}
-
-void loop()
-{
-  uint16_t t = micros();
-  if(readSBUS())
+  if(doIt)
   {
-    uint16_t dt1 = micros() - t;
-    Serial.print("dt1 ");
-    Serial.print(dt1);
-    Serial.print('\t');
-    
-    decodeSBUS(frame);
-
-    uint16_t dt2 = micros() - t;
-    Serial.print("dt2 ");
-    Serial.print(dt2);
-    Serial.print('\t');
-
     Serial.print(rx.throttle);
     Serial.print('\t');
     Serial.print(rx.roll);
@@ -145,12 +131,78 @@ void loop()
     Serial.print('\t');
     Serial.print(rx.failsafe);
     Serial.println('\t');
+  }
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  Serial1.begin(100000, SERIAL_8E2_RXINV);
+}
+
+void loop()
+{
+  uint16_t t = micros();
+  if(readSBUS())
+  {
+    // uint16_t dt1 = micros() - t;
+    // Serial.print("dt1 ");
+    // Serial.print(dt1);
+    // Serial.print('\t');
+    
+    decodeSBUS(frame);
+    printRx(1);
+
+    // uint16_t dt2 = micros() - t;
+    // Serial.print("dt2 ");
+    // Serial.print(dt2);
+    // Serial.print('\t');
+
+    // Serial.print(rx.throttle);
+    // Serial.print('\t');
+    // Serial.print(rx.roll);
+    // Serial.print('\t');
+    // Serial.print(rx.pitch);
+    // Serial.print('\t');
+    // Serial.print(rx.yaw);
+    // Serial.print('\t');
+
+    // Serial.print(rx.armSwitch);
+    // Serial.print('\t');
+    // Serial.print(rx.switch3);
+    // Serial.print('\t');
+    // Serial.print(rx.switch4);
+    // Serial.print('\t');
+    // Serial.print(rx.switch5);
+    // Serial.print('\t');
+    // Serial.print(rx.switch6);
+    // Serial.print('\t');
+
+    // Serial.print(rx.pot1);
+    // Serial.print('\t');
+    // Serial.print(rx.pot2);
+    // Serial.print('\t');
+
+    // Serial.print(rx.frameLost);
+    // Serial.print('\t');
+    // Serial.print(rx.failsafe);
+    // Serial.println('\t');
 
     // uint16_t dt = micros() - t;
     // Serial.print("dt ");
     // Serial.println(dt);
     // Serial.println();
   }
+  ++countTot;
+
+  // if(countTot % 1000 == 0)
+  // {
+  //   Serial.print(countSBUS);
+  //   Serial.print('\t');
+  //   Serial.print(countTot);
+  //   Serial.println('\t');
+  // }
+
   // uint16_t dt = t - micros();
   // Serial.println(dt);
 }
