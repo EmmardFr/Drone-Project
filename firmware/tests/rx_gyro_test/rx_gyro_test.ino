@@ -1,6 +1,6 @@
 #include "gyro.h"
-#include "sd_card.h"
 #include "rx.h"
+#include "sd_card.h"
 
 constexpr uint32_t LOOP_PERIOD_US = 1000; // 1 kHz
 
@@ -51,17 +51,6 @@ void loop()
   {
     decodeSBUS(frame);
     printRx(1);
-
-    // static uint32_t t_rx = micros();
-    // uint32_t dt_rx = micros() - t_rx;
-    // t_rx = micros();
-    // Serial.print("dt_rx ");
-    // Serial.println(dt_rx);
-
-    // uint32_t t_rx = micros();
-    // uint32_t dt_rx = t_rx - t;
-    // Serial.print("dt_rx ");
-    // Serial.println(dt_rx);
   }
 
   // Gyro
@@ -77,12 +66,6 @@ void loop()
   loopSD(filteredGyro);
 
   printGyro(1, filteredGyro);
-
-  // static uint32_t t_gy = micros();
-  // uint32_t dt_gy = micros() - t_gy;
-  // t_gy = micros();
-  // Serial.print("dt_gy ");
-  // Serial.println(dt_gy);
 
   // type q in the serial monitor to stop the program
   // and flush the data in the sd card

@@ -36,6 +36,10 @@ void setupRx()
 bool readSBUS()
 {
   static uint8_t idx = 0;
+  static uint8_t z = 0;
+  static uint8_t y = 0;
+
+  uint8_t zeroF[25];
 
   while(Serial1.available())
   {
@@ -44,11 +48,18 @@ bool readSBUS()
     if(idx == 0 && b != 0x0F)
       continue;
 
+    if(b == 0x0F && idx != 0)
+    {
+      Serial.println("SBUS Shift");
+      zeroF[z++] = idx;
+    }
+
     frame[idx++] = b;
 
     if(idx == 25)
     {
       idx = 0;
+      z = 0;
 
       if(frame[24] == 0x00)
         return true;
@@ -56,7 +67,6 @@ bool readSBUS()
       continue;
     }
   }
-
   return false;
 }
 
