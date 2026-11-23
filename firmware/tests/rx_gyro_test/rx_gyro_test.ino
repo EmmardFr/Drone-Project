@@ -10,22 +10,16 @@ void stopProgram()
   {
     char c = Serial.read();
 
-    if(c == 'q')
+    if (c == 'q')
     {
-      logFile.flush();
-      logFile.close();
-      rxFlushSD = false;
+      logFileIMU.flush();
+      logFileIMU.close();
+
+      logFileRX.flush();
+      logFileRX.close();
 
       while(1);
     }
-  }
-  if(rxFlushSD)
-  {
-    logFile.flush();
-    logFile.close();
-    rxFlushSD = false;
-
-    while(1);
   }
 }
 
@@ -47,15 +41,36 @@ void setup()
 
   // Gyro setup
   setupRx();
+
+  float x = 54.2;
 }
 
 void loop()
 {
+  // uint32_t t = micros();
+
   // rx
   if(readSBUS())
   {
     decodeSBUS(frame);
-    printRx(1);
+    printRx(0);
+
+    // uint32_t t = micros();
+    // loopSD_RX(rx);
+    // uint32_t dt = micros() - t;
+    // Serial.print("dt_Gy ");
+    // Serial.println(dt);
+
+    // static uint32_t t_rx = micros();
+    // uint32_t dt_rx = micros() - t_rx;
+    // t_rx = micros();
+    // Serial.print("dt_rx ");
+    // Serial.println(dt_rx);
+
+    // uint32_t t_rx = micros();
+    // uint32_t dt_rx = t_rx - t;
+    // Serial.print("dt_rx ");
+    // Serial.println(dt_rx);
   }
 
   // Gyro
@@ -68,15 +83,27 @@ void loop()
   Gyro raw = readGyro();
   Gyro filteredGyro = filterGyro(raw);
 
-  loopSD(filteredGyro);
+  uint32_t t = micros();
+  loopSD_IMU(filteredGyro);;
+  uint32_t dt = micros() - t;
+  Serial.print("dt_IMU ");
+  Serial.println(dt);
 
-  printGyro(1, filteredGyro);
+  printGyro(0, filteredGyro);
 
-  // static uint32_t t = micros();
-  // uint32_t dt = micros() - t;
-  // t = micros();
-  // if(dt > 1006)
-  //   Serial.println(dt);
+  // static uint32_t t_gy = micros();
+  // uint32_t dt_gy = micros() - t_gy;
+  // t_gy = micros();
+  // Serial.print("dt_gy ");
+  // Serial.println(dt_gy);
 
+  // type q in the serial monitor to stop the program
+  // and flush the data in the sd card
   stopProgram();
 }
+
+
+
+
+
+

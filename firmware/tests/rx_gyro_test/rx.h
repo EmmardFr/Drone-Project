@@ -25,9 +25,8 @@ struct RCChannels {
 
 RCChannels rx;
 
-bool rxFlushSD = false;
-
 uint8_t frame[25];
+
 
 void setupRx()
 {
@@ -41,13 +40,9 @@ bool readSBUS()
   while(Serial1.available())
   {
     uint8_t b = Serial1.read();
-    // Serial.print(b, HEX);
 
-    if(idx == 0)
-    {
-      if(b != 0x0F)
-        continue;
-    }
+    if(idx == 0 && b != 0x0F)
+      continue;
 
     frame[idx++] = b;
 
@@ -55,21 +50,13 @@ bool readSBUS()
     {
       idx = 0;
 
-      if(frame[0] == 0x0F && frame[24] == 0x00)
+      if(frame[24] == 0x00)
         return true;
 
-      // resync quickly
-      for(uint8_t i = 1; i < 25; i++)
-      {
-        if(frame[i] == 0x0F)
-        {
-          memmove(frame, &frame[i], 25-i);
-          idx = 25-i;
-          break;
-        }
-      }
+      continue;
     }
   }
+
   return false;
 }
 
@@ -80,12 +67,7 @@ void normalizeChannels()
   rx.pitch      =  (rx.pitch - 992) / 1000.0;
   rx.yaw        =    (rx.yaw - 992) / 1000.0;
 
-  rx.armSwitch = (rx.armSwitch > 1000) ? 1 : 0;
-  static bool rxArmSwitch = 0;
-  if(rxArmSwitch == 1 && rx.armSwitch == 0)
-    rxFlushSD = true;
-  rxArmSwitch = rx.armSwitch;
-
+  rx.armSwitch  = (rx.armSwitch > 1000) ? 1 : 0;
   rx.switch2    = (rx.switch2 > 1500) ? 1 : ((rx.switch2 < 500) ? -1 : 0);
   rx.switch3    = (rx.switch3 > 1500) ? 1 : ((rx.switch3 < 500) ? -1 : 0);
   rx.switch4    = (rx.switch4 > 1500) ? 1 : ((rx.switch4 < 500) ? -1 : 0);
@@ -119,9 +101,6 @@ void decodeSBUS(uint8_t frame[25])
   rx.failsafe   =   frame[23] & (1 << 3);
 
   normalizeChannels();
-
-  if(rx.failsafe && rx.armSwitch)
-    rxFlushSD = true;
 }
 
 void printRx(bool doIt)
