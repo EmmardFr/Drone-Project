@@ -36,35 +36,56 @@ void setupRx()
 bool readSBUS()
 {
   static uint8_t idx = 0;
-  static uint8_t z = 0;
-  static uint8_t y = 0;
 
-  uint8_t zeroF[25];
+  static uint8_t comHexa[4][25];
+  static uint8_t indexCom[4] = {0};
 
   while(Serial1.available())
   {
     uint8_t b = Serial1.read();
 
-    if(idx == 0 && b != 0x0F)
+    if(indexCom[idx] == 0 && b != 0x0F)
       continue;
+    
+    else if(indexCom[idx] != 0 && b == 0x0F && indexCom[(idx+1)%4] == 0)
+      comHexa[(idx+1)%4][indexCom[(idx+1)%4]++] = b;
 
-    if(b == 0x0F && idx != 0)
+    else if(indexCom[idx] != 0 && indexCom[(idx+1)%4] != 0 && indexCom[(idx+2)%4] == 0 && b == 0x0F)
     {
-      Serial.println("SBUS Shift");
-      zeroF[z++] = idx;
+      comHexa[(idx+2)%4][indexCom[(idx+2)%4]++] = b;
+      comHexa[(idx+1)%4][indexCom[(idx+1)%4]++] = b;
     }
 
-    frame[idx++] = b;
-
-    if(idx == 25)
+    else if(indexCom[idx] != 0 && indexCom[(idx+1)%4] != 0 && indexCom[(idx+2)%4] != 0 && indexCom[(idx+3)%4] == 0 && b == 0x0F)
     {
-      idx = 0;
-      z = 0;
+      comHexa[(idx+3)%4][indexCom[(idx+3)%4]++] = b;
+      comHexa[(idx+2)%4][indexCom[(idx+2)%4]++] = b;
+      comHexa[(idx+1)%4][indexCom[(idx+1)%4]++] = b;
+    }
 
-      if(frame[24] == 0x00)
+    comHexa[idx][indexCom[idx]++] = b;
+
+    if(indexCom[idx] == 25)
+    {
+      indexCom[idx] = 0;
+
+      if(comHexa[idx][24] == 0x00)
+      {
+        for(uint8_t i = 0; i < 25; i++)
+        {
+          frame[i] = comHexa[idx][i];
+        }
+        indexCom[(idx+1)%4] = 0;
+        indexCom[(idx+2)%4] = 0;
+        indexCom[(idx+3)%4] = 0;
         return true;
+      }
+      else
+      {
+        idx = (idx + 1) % 4;
+        continue;
+      }
 
-      continue;
     }
   }
   return false;

@@ -8,7 +8,7 @@ String createLogFileName()
 
     for (int i = 0; i < 10000; i++)
     {
-        sprintf(filename, "logs%04d.csv", i);
+        sprintf(filename, "gyro%04d.csv", i);
 
         if (!SD.exists(filename))
         {
@@ -32,7 +32,7 @@ void setupSD()
 
     if (!logFile) {
         Serial.println("Failed to open file");
-        while (1);
+        while(1);
     }
 
     logFile.println("time_us,gyroX,gyroY,gyroZ,rxThrottle,rxRoll,rxPitch,rxYaw,armSwitch,frameLost,failsafe");
@@ -66,10 +66,4 @@ void loopSD(Gyro gyro)
     logFile.print(rx.frameLost);
     logFile.print(",");
     logFile.println(rx.failsafe);
-
-    // // Reduce SD wear + ensure data is written
-    // static int counter = 0;
-    // if (++counter % 1000 == 0) {
-    //     logFile.flush();
-    // }
 }
