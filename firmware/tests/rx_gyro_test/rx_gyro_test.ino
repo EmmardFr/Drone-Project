@@ -10,13 +10,22 @@ void stopProgram()
   {
     char c = Serial.read();
 
-    if (c == 'q')
+    if(c == 'q')
     {
       logFile.flush();
       logFile.close();
+      rxFlushSD = false;
 
       while(1);
     }
+  }
+  if(rxFlushSD)
+  {
+    logFile.flush();
+    logFile.close();
+    rxFlushSD = false;
+
+    while(1);
   }
 }
 
@@ -42,8 +51,6 @@ void setup()
 
 void loop()
 {
-  // uint32_t t = micros();
-
   // rx
   if(readSBUS())
   {
@@ -63,7 +70,13 @@ void loop()
 
   loopSD(filteredGyro);
 
-  printGyro(0, filteredGyro);
+  printGyro(1, filteredGyro);
+
+  // static uint32_t t = micros();
+  // uint32_t dt = micros() - t;
+  // t = micros();
+  // if(dt > 1006)
+  //   Serial.println(dt);
 
   stopProgram();
 }
