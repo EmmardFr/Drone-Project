@@ -1,7 +1,8 @@
+// Moving integral
 // #define ROLLING_WINDOW_SIZE 256
-
 #define ROLLING_WINDOW_SIZE 0
-#define I_LIMIT 15.0f
+// Accumulating integral + safety limit
+#define I_LIMIT 10.0f
 
 struct PID_AXIS{
   float roll;
@@ -41,6 +42,10 @@ constexpr float dt = 0.001;
 
 PID_AXIS pid = {0.0, 0.0, 0.0};
 
+PID roll_pid  = {0.00, 0.00, 0.00};
+PID pitch_pid = {0.00, 0.00, 0.00};
+PID yaw_pid   = {0.00, 0.00, 0.00};
+
 PID updateErrors(float current_control_rate, float current_gyro_rate, float previous_gyro_rate, uint32_t &currentIndex, float (&rolling_window)[ROLLING_WINDOW_SIZE], float &integral)
 {
   PID errors = {0.0, 0.0, 0.0};
@@ -60,8 +65,6 @@ PID updateErrors(float current_control_rate, float current_gyro_rate, float prev
   }
   else
   {
-    // errors.i += current_error;
-    
     integral += current_error * dt;
     integral = constrain(integral, -I_LIMIT, I_LIMIT);
 
@@ -94,9 +97,13 @@ void computePid(float control_roll_rate, float control_pitch_rate, float control
   previous_gyro_rate.pitch = gyro_pitch_rate;
   previous_gyro_rate.yaw   = gyro_yaw_rate;
 
-  pid.roll  = roll_coeff.p * roll_errors.p   + roll_coeff.i * roll_errors.i   + roll_coeff.d * roll_errors.d;
-  pid.pitch = pitch_coeff.p * pitch_errors.p + pitch_coeff.i * pitch_errors.i + pitch_coeff.d * pitch_errors.d;
-  pid.yaw   = yaw_coeff.p * yaw_errors.p     + yaw_coeff.i * yaw_errors.i     + yaw_coeff.d * yaw_errors.d;
+  roll_pid  = {roll_coeff.p * roll_errors.p,   roll_coeff.i * roll_errors.i,   roll_coeff.d * roll_errors.d};
+  pitch_pid = {pitch_coeff.p * pitch_errors.p, pitch_coeff.i * pitch_errors.i, pitch_coeff.d * pitch_errors.d};
+  yaw_pid   = {yaw_coeff.p * yaw_errors.p,     yaw_coeff.i * yaw_errors.i,     yaw_coeff.d * yaw_errors.d};
+
+  pid.roll  = roll_pid.p  + roll_pid.i  + roll_pid.d;
+  pid.pitch = pitch_pid.p + pitch_pid.i + pitch_pid.d;
+  pid.yaw   = yaw_pid.p   + yaw_pid.i   + yaw_pid.d;
 }
 
 void printPID(bool doIt = true)

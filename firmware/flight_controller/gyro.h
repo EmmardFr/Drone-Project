@@ -17,38 +17,38 @@ Gyro gyroBias;
 
 Gyro readGyro()
 {
-    SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE3));
-    digitalWrite(CS_IMU, LOW);
+  SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE3));
+  digitalWrite(CS_IMU, LOW);
 
-    SPI.transfer(0x43 | 0x80);  // Read
-    uint8_t gX_out_H = SPI.transfer(0x00);
-    uint8_t gX_out_L = SPI.transfer(0x00);
-    uint8_t gY_out_H = SPI.transfer(0x00);
-    uint8_t gY_out_L = SPI.transfer(0x00);
-    uint8_t gZ_out_H = SPI.transfer(0x00);
-    uint8_t gZ_out_L = SPI.transfer(0x00);
+  SPI.transfer(0x43 | 0x80);  // Read
+  uint8_t gX_out_H = SPI.transfer(0x00);
+  uint8_t gX_out_L = SPI.transfer(0x00);
+  uint8_t gY_out_H = SPI.transfer(0x00);
+  uint8_t gY_out_L = SPI.transfer(0x00);
+  uint8_t gZ_out_H = SPI.transfer(0x00);
+  uint8_t gZ_out_L = SPI.transfer(0x00);
 
-    digitalWrite(CS_IMU, HIGH);
-    SPI.endTransaction();
+  digitalWrite(CS_IMU, HIGH);
+  SPI.endTransaction();
 
-    int16_t gX_out = (int16_t)(gX_out_H << 8 | gX_out_L);
-    int16_t gY_out = (int16_t)(gY_out_H << 8 | gY_out_L);
-    int16_t gZ_out = (int16_t)(gZ_out_H << 8 | gZ_out_L);
+  int16_t gX_out = (int16_t)(gX_out_H << 8 | gX_out_L);
+  int16_t gY_out = (int16_t)(gY_out_H << 8 | gY_out_L);
+  int16_t gZ_out = (int16_t)(gZ_out_H << 8 | gZ_out_L);
 
-    // Serial.print("gX_out = ");
-    // Serial.println(gX_out);
-    // Serial.print("gY_out = ");
-    // Serial.println(gY_out);
-    // Serial.print("gZ_out = ");
-    // Serial.println(gZ_out);
+  // Serial.print("gX_out = ");
+  // Serial.println(gX_out);
+  // Serial.print("gY_out = ");
+  // Serial.println(gY_out);
+  // Serial.print("gZ_out = ");
+  // Serial.println(gZ_out);
 
-    float gyroX = gX_out * scale;
-    float gyroY = gY_out * scale;
-    float gyroZ = gZ_out * scale;
+  float gyroX = gX_out * scale;
+  float gyroY = gY_out * scale;
+  float gyroZ = gZ_out * scale;
 
-    Gyro gyro = {gyroX, gyroY, gyroZ};
+  Gyro gyro = {gyroX, gyroY, gyroZ};
 
-    return gyro;
+  return gyro;
 }
 
 void computeBiasGyro()
@@ -61,11 +61,11 @@ void computeBiasGyro()
     float sumZ = 0.0;
 
     for(uint i = 0; i < iterations; i++){
-        gyro = readGyro();
-        sumX += gyro.x;
-        sumY += gyro.y;
-        sumZ += gyro.z;
-        delayMicroseconds(1000);
+      gyro = readGyro();
+      sumX += gyro.x;
+      sumY += gyro.y;
+      sumZ += gyro.z;
+      delayMicroseconds(1000);
     }
 
     gyroBias.x = sumX / iterations;
