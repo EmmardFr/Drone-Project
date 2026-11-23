@@ -86,7 +86,9 @@ Gyro deadBandFilter(Gyro gyro)
 Gyro lowPassFilter(Gyro gyro)
 {
   static Gyro state = {0,0,0};
-  float alpha = 0.85f;
+  // float alpha = 0.85f;
+  float alpha = 0.95f;
+  // float alpha = 0.75f;
 
   state.x = alpha * state.x + (1.0f - alpha) * gyro.x;
   state.y = alpha * state.y + (1.0f - alpha) * gyro.y;

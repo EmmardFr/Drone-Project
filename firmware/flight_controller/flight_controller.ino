@@ -17,7 +17,6 @@ void stopProgram()
     {
       logFile.flush();
       logFile.close();
-      flushAllPendingSD();
       rxFlushSD = false;
 
       while(1);
@@ -42,8 +41,6 @@ void stopProgram()
     logFile.close();
 
     rxFlushSD = false;
-
-    flushAllPendingSD();
 
     while(1);
   }
@@ -81,22 +78,25 @@ void setup()
 
 void loop()
 {
-  static uint32_t nextLoop = micros() + LOOP_PERIOD_US;
-
   // rx
   if(readSBUS())
   {
     decodeSBUS(frame);
     printRx(0);
   }
-  serviceSDWriter(nextLoop);
 
   // Control loop
+  static uint32_t nextLoop = micros() + LOOP_PERIOD_US;
   if ((int32_t)(micros() - nextLoop) < 0)
     return;
-
+  
   nextLoop += LOOP_PERIOD_US;
   // nextLoop = micros() + LOOP_PERIOD_US;
+
+  uint32_t now = micros();
+  static uint32_t prev_time = now - 1000;
+  float dt = (now - prev_time) * 1e-6f;
+  prev_time = now;
 
   // Gyro read and filter
   Gyro raw = readGyro();
@@ -106,7 +106,7 @@ void loop()
   // Compute PID and send commands to motors
   MOTOR_POWER motor_power;
 
-  if(rx.armSwitch == 0)
+  if(rx.armSwitch == 0 && !rx.failsafe && !rxSignalLost())
   {
     sendThrottle(MOTOR_STOP, MOTOR_PIN1);
     sendThrottle(MOTOR_STOP, MOTOR_PIN2);
@@ -115,18 +115,52 @@ void loop()
 
     motor_power = {0,0,0,0};
   }
+  else if(failsafeConfirmed() || rxSignalLost())
+  {
+    sendThrottle(MOTOR_STOP, MOTOR_PIN1);
+    sendThrottle(MOTOR_STOP, MOTOR_PIN2);
+    sendThrottle(MOTOR_STOP, MOTOR_PIN3);
+    sendThrottle(MOTOR_STOP, MOTOR_PIN4);
+
+    motor_power = {0, 0, 0, 0};
+
+    rxFlushSD = true;
+  }
+  else if(rx.failsafe)
+  {
+    sendThrottle(prev_motor1, MOTOR_PIN1);
+    sendThrottle(prev_motor2, MOTOR_PIN2);
+    sendThrottle(prev_motor3, MOTOR_PIN3);
+    sendThrottle(prev_motor4, MOTOR_PIN4);
+
+    motor_power = {prev_motor1, prev_motor2, prev_motor3, prev_motor4};
+  }
   else
   {
-    computePid(rx.roll, -rx.pitch, -rx.yaw, filteredGyro.y, filteredGyro.x, filteredGyro.z);
-    printPID(0);
+    if(firstArm && rx.throttle > 0.05)
+    {
+      sendThrottle(MOTOR_STOP, MOTOR_PIN1);
+      sendThrottle(MOTOR_STOP, MOTOR_PIN2);
+      sendThrottle(MOTOR_STOP, MOTOR_PIN3);
+      sendThrottle(MOTOR_STOP, MOTOR_PIN4);
 
-    motor_power = computePower(rx.throttle, pid.roll, pid.pitch, pid.yaw);
-    printMPower(motor_power, 0);
-    
-    sendThrottle(motor_power.motor1, MOTOR_PIN1);
-    sendThrottle(motor_power.motor2, MOTOR_PIN2);
-    sendThrottle(motor_power.motor3, MOTOR_PIN3);
-    sendThrottle(motor_power.motor4, MOTOR_PIN4);
+      motor_power = {0, 0, 0, 0};
+
+      rxFlushSD = true;
+    }
+    else
+    {
+      computePid(rx.roll, -rx.pitch, -rx.yaw, filteredGyro.y, filteredGyro.x, filteredGyro.z, dt);
+      printPID(0);
+
+      motor_power = computePower(rx.throttle, pid.roll, pid.pitch, pid.yaw);
+      printMPower(motor_power, 0);
+      
+      sendThrottle(motor_power.motor1, MOTOR_PIN1);
+      sendThrottle(motor_power.motor2, MOTOR_PIN2);
+      sendThrottle(motor_power.motor3, MOTOR_PIN3);
+      sendThrottle(motor_power.motor4, MOTOR_PIN4);
+    }
   }
 
   // log in sd card

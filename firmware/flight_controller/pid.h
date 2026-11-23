@@ -2,7 +2,7 @@
 // #define ROLLING_WINDOW_SIZE 256
 #define ROLLING_WINDOW_SIZE 0
 // Accumulating integral + safety limit
-#define I_LIMIT 10.0f
+#define I_LIMIT 30.0f
 
 struct PID_AXIS{
   float roll;
@@ -34,11 +34,18 @@ struct ROLLING_WINDOW{
   float yaw[ROLLING_WINDOW_SIZE];
 };
 
-constexpr PID roll_coeff  = {1.00, 4.00, 0.00};
-constexpr PID pitch_coeff = {1.00, 4.00, 0.00};
-constexpr PID yaw_coeff   = {1.00, 4.00, 0.00};
+// constexpr PID roll_coeff  = {1.10, 2.50, 0.0001}; // 
+// constexpr PID pitch_coeff = {1.10, 1.90, 0.0001}; // 
+// constexpr PID yaw_coeff   = {1.10, 1.50, 0.0001}; //
 
-constexpr float dt = 0.001;
+constexpr PID roll_coeff  = {1.20, 4.00, 0.045}; // 
+constexpr PID pitch_coeff = {1.10, 4.00, 0.045}; // 
+constexpr PID yaw_coeff   = {1.40, 2.20, 0.04}; //
+
+// constexpr PID roll_coeff  = {1.10, 4.00, 0.04}; // good...
+// constexpr PID pitch_coeff = {1.10, 4.00, 0.04}; // good!
+
+// constexpr float dt = 0.001;
 
 PID_AXIS pid = {0.0, 0.0, 0.0};
 
@@ -46,14 +53,22 @@ PID roll_pid  = {0.00, 0.00, 0.00};
 PID pitch_pid = {0.00, 0.00, 0.00};
 PID yaw_pid   = {0.00, 0.00, 0.00};
 
-PID updateErrors(float current_control_rate, float current_gyro_rate, float previous_gyro_rate, uint32_t &currentIndex, float (&rolling_window)[ROLLING_WINDOW_SIZE], float &integral)
+constexpr float D_CUTOFF_HZ = 10.0f;
+constexpr float RC = 1.0f / (2.0f * PI * D_CUTOFF_HZ);
+
+PID updateErrors(float current_control_rate, float current_gyro_rate, float previous_gyro_rate, uint32_t &currentIndex, float (&rolling_window)[ROLLING_WINDOW_SIZE], float &integral, float &d_filtered, float dt)
 {
   PID errors = {0.0, 0.0, 0.0};
 
   float current_error = current_control_rate - current_gyro_rate;
   
   errors.p = current_error;
-  errors.d = -(current_gyro_rate - previous_gyro_rate) / dt;
+
+  // errors.d = -(current_gyro_rate - previous_gyro_rate) / dt;
+  float alpha = dt / (RC + dt);
+  float raw_d = -(current_gyro_rate - previous_gyro_rate) / dt;
+  d_filtered += alpha * (raw_d - d_filtered);
+  errors.d = d_filtered;
 
   if(ROLLING_WINDOW_SIZE != 0)
   {
@@ -74,7 +89,7 @@ PID updateErrors(float current_control_rate, float current_gyro_rate, float prev
   return errors;
 }
 
-void computePid(float control_roll_rate, float control_pitch_rate, float control_yaw_rate, float gyro_roll_rate, float gyro_pitch_rate, float gyro_yaw_rate)
+void computePid(float control_roll_rate, float control_pitch_rate, float control_yaw_rate, float gyro_roll_rate, float gyro_pitch_rate, float gyro_yaw_rate, float dt)
 {
   static PID roll_errors  = {0.0, 0.0, 0.0};
   static PID pitch_errors = {0.0, 0.0, 0.0};
@@ -84,14 +99,20 @@ void computePid(float control_roll_rate, float control_pitch_rate, float control
   static float pitch_integral = 0;
   static float yaw_integral = 0;
 
-  static PREVIOUS_GYRO previous_gyro_rate = {0.00, 0.00, 0.00};
+  static float roll_d_filtered  = 0.0f;
+  static float pitch_d_filtered = 0.0f;
+  static float yaw_d_filtered   = 0.0f;
+
+  static PREVIOUS_GYRO previous_gyro_rate = {gyro_roll_rate, gyro_pitch_rate, gyro_yaw_rate};
 
   static ROT_AXIS currentIndex = {0, 0, 0};
   static ROLLING_WINDOW rolling_window;
 
-  roll_errors  = updateErrors(control_roll_rate,  gyro_roll_rate,   previous_gyro_rate.roll,  currentIndex.roll,  rolling_window.roll,  roll_integral);
-  pitch_errors = updateErrors(control_pitch_rate, gyro_pitch_rate,  previous_gyro_rate.pitch, currentIndex.pitch, rolling_window.pitch, pitch_integral);
-  yaw_errors   = updateErrors(control_yaw_rate,   gyro_yaw_rate,    previous_gyro_rate.yaw,  currentIndex.yaw,    rolling_window.yaw,   yaw_integral);
+  dt = constrain(dt, 0.0005f, 0.005f); // to avoid crazy i and d terms when dt is occasionnally getting big
+
+  roll_errors  = updateErrors(control_roll_rate,  gyro_roll_rate,   previous_gyro_rate.roll,  currentIndex.roll,  rolling_window.roll,  roll_integral,  roll_d_filtered,  dt);
+  pitch_errors = updateErrors(control_pitch_rate, gyro_pitch_rate,  previous_gyro_rate.pitch, currentIndex.pitch, rolling_window.pitch, pitch_integral, pitch_d_filtered, dt);
+  yaw_errors   = updateErrors(control_yaw_rate,   gyro_yaw_rate,    previous_gyro_rate.yaw,  currentIndex.yaw,    rolling_window.yaw,   yaw_integral,   yaw_d_filtered,   dt);
 
   previous_gyro_rate.roll  = gyro_roll_rate;
   previous_gyro_rate.pitch = gyro_pitch_rate;

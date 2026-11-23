@@ -2,6 +2,11 @@ constexpr uint16_t MOTOR_STOP     = 0;
 constexpr uint16_t MOTOR_IDLE     = 130;
 constexpr uint16_t MOTOR_MAX      = 2047;
 
+uint16_t prev_motor1 = 0;
+uint16_t prev_motor2 = 0;
+uint16_t prev_motor3 = 0;
+uint16_t prev_motor4 = 0;
+
 struct MOTOR_POWER{
   uint32_t motor1;
   uint32_t motor2;
@@ -23,6 +28,11 @@ MOTOR_POWER computePower(float throttle, float roll, float pitch, float yaw)
   pwr.motor2 = constrain(throttleCmd - roll + pitch + yaw, MOTOR_IDLE, MOTOR_MAX);
   pwr.motor3 = constrain(throttleCmd + roll - pitch + yaw, MOTOR_IDLE, MOTOR_MAX);
   pwr.motor4 = constrain(throttleCmd + roll + pitch - yaw, MOTOR_IDLE, MOTOR_MAX);
+
+  prev_motor1 = pwr.motor1;
+  prev_motor2 = pwr.motor2;
+  prev_motor3 = pwr.motor3;
+  prev_motor4 = pwr.motor4;
 
   return pwr;
 }

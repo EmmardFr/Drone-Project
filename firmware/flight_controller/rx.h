@@ -29,9 +29,23 @@ bool rxFlushSD = false;
 
 uint8_t frame[25];
 
+constexpr uint32_t FAILSAFE_TIMEOUT_US  = 70000; // 70 ms
+constexpr uint32_t RX_TIMEOUT_US        = 70000; // 70 ms
+constexpr uint32_t SBUS_TIMEOUT_US      = 70000; // 70 ms
+
+volatile uint32_t failsafeStartTime   = 0;
+volatile uint32_t lastValidFrameTime  = 0;
+volatile uint32_t lastValidSBUS       = 0;
+
+bool firstArm = 0;
+bool armed    = 0;
+
 void setupRx()
 {
   Serial1.begin(100000, SERIAL_8E2_RXINV);
+  failsafeStartTime   = micros();
+  lastValidFrameTime  = micros();
+  lastValidSBUS       = micros();
 }
 
 bool readSBUS()
@@ -56,7 +70,10 @@ bool readSBUS()
       idx = 0;
 
       if(frame[0] == 0x0F && frame[24] == 0x00)
+      {
+        lastValidSBUS = micros();
         return true;
+      }
 
       // resync quickly
       for(uint8_t i = 1; i < 25; i++)
@@ -81,9 +98,21 @@ void normalizeChannels()
   rx.yaw        =                                 (rx.yaw - 992) / 1000.0;
 
   rx.armSwitch = (rx.armSwitch > 1000) ? 1 : 0;
+
   static bool rxArmSwitch = 0;
-  if(rxArmSwitch == 1 && rx.armSwitch == 0)
+  if(rxArmSwitch == 1 && rx.armSwitch == 0 && !rx.failsafe)
+  {
     rxFlushSD = true;
+    firstArm = false;
+  }
+  else if(!armed && rxArmSwitch == 0 && rx.armSwitch == 1)
+  {
+    firstArm  = true;
+    armed     = true;
+  }
+  else
+    firstArm = false;
+  
   rxArmSwitch = rx.armSwitch;
 
   rx.switch2    = (rx.switch2 > 1500) ? 1 : ((rx.switch2 < 500) ? -1 : 0);
@@ -125,11 +154,39 @@ void decodeSBUS(uint8_t frame[25])
   rx.frameLost  =   frame[23] & (1 << 2);
   rx.failsafe   =   frame[23] & (1 << 3);
 
+  if(!rx.frameLost)
+  {
+    lastValidFrameTime = micros();
+  }
+
   normalizeChannels();
   translateToRate();
 
-  if(rx.failsafe && rx.armSwitch)
-    rxFlushSD = true;
+  // if(rx.failsafe && rx.armSwitch)
+  //   rxFlushSD = true;
+}
+
+bool failsafeConfirmed()
+{
+  if (!rx.failsafe)
+  {
+    failsafeStartTime = 0;
+    return false;
+  }
+
+  uint32_t now = micros();
+
+  if (failsafeStartTime == 0)
+  {
+    failsafeStartTime = now;
+  }
+
+  return (uint32_t)(now - failsafeStartTime) >= FAILSAFE_TIMEOUT_US;
+}
+
+bool rxSignalLost()
+{
+  return ((uint32_t)(micros() - lastValidFrameTime) > RX_TIMEOUT_US) || ((uint32_t)(micros() - lastValidSBUS) > SBUS_TIMEOUT_US);
 }
 
 void printRx(bool doIt)
