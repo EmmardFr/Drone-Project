@@ -35,21 +35,11 @@ same name as its `.ino` file, so keep that convention when adding sketches.
 
 ## Libraries
 
-`libraries/` is a copy of Arduino libraries used by earlier experiments. The Arduino
-IDE does **not** read it: it uses `Documents/Arduino/libraries`. It will be removed;
-install from the Library Manager instead:
-
-| Library | Version |
-|---------|---------|
-| Adafruit BNO055 | 1.6.4 |
-| Adafruit BusIO | 1.17.4 |
-| Adafruit Unified Sensor | 1.1.15 |
-| ArduinoJson | 7.4.2 |
-| ArxTypeTraits | 0.3.2 |
-| Eigen (ArduinoEigen) | 0.3.2 |
-| PPM-reader | 1.2.0 |
-| PPM | 1.1.5 |
-| SparkFun BMP581 Arduino Library | 1.0.1 |
+None needed: the firmware only uses `SPI` and `SD` from the Teensy core.
+Libraries used by earlier experiments (removed, still in the `pre-cleanup` tag):
+Adafruit BNO055 1.6.4, Adafruit BusIO 1.17.4, Adafruit Unified Sensor 1.1.15,
+ArduinoJson 7.4.2, ArxTypeTraits 0.3.2, Eigen 0.3.2, PPM-reader 1.2.0, PPM 1.1.5,
+SparkFun BMP581 1.0.1. Install from the Arduino Library Manager if needed.
 
 ## Versions
 
