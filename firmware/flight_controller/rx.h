@@ -29,12 +29,12 @@ bool rxFlushSD = false;
 
 uint8_t frame[25];
 
-constexpr uint32_t FAILSAFE_TIMEOUT_US  = 70000; // 70 ms
-constexpr uint32_t RX_TIMEOUT_US        = 70000; // 70 ms
-constexpr uint32_t SBUS_TIMEOUT_US      = 70000; // 70 ms
+constexpr uint32_t FAILSAFE_TIMEOUT_US    = 70000; // 70 ms
+constexpr uint32_t FRAME_LOST_TIMEOUT_US  = 70000; // 70 ms
+constexpr uint32_t SBUS_TIMEOUT_US        = 70000; // 70 ms
 
 volatile uint32_t failsafeStartTime   = 0;
-volatile uint32_t lastValidFrameTime  = 0;
+volatile uint32_t frameLostStartTime  = 0;
 volatile uint32_t lastValidSBUS       = 0;
 
 bool firstArm = 0;
@@ -43,9 +43,7 @@ bool armed    = 0;
 void setupRx()
 {
   Serial1.begin(100000, SERIAL_8E2_RXINV);
-  failsafeStartTime   = micros();
-  lastValidFrameTime  = micros();
-  lastValidSBUS       = micros();
+  lastValidSBUS = micros();
 }
 
 bool readSBUS()
@@ -154,10 +152,10 @@ void decodeSBUS(uint8_t frame[25])
   rx.frameLost  =   frame[23] & (1 << 2);
   rx.failsafe   =   frame[23] & (1 << 3);
 
-  if(!rx.frameLost)
-  {
-    lastValidFrameTime = micros();
-  }
+  // if(!rx.frameLost)
+  // {
+  //   lastValidFrameTime = micros();
+  // }
 
   normalizeChannels();
   translateToRate();
@@ -184,9 +182,29 @@ bool failsafeConfirmed()
   return (uint32_t)(now - failsafeStartTime) >= FAILSAFE_TIMEOUT_US;
 }
 
+bool frameLostConfirmed()
+{
+  uint32_t now = micros();
+
+  if(rx.frameLost)
+  {
+    if(frameLostStartTime == 0)
+      frameLostStartTime = now;
+
+    if((uint32_t)(now - frameLostStartTime) >= FRAME_LOST_TIMEOUT_US)
+      return true;
+  }
+  else
+  {
+    frameLostStartTime = 0;
+  }
+
+  return false;
+}
+
 bool rxSignalLost()
 {
-  return ((uint32_t)(micros() - lastValidFrameTime) > RX_TIMEOUT_US) || ((uint32_t)(micros() - lastValidSBUS) > SBUS_TIMEOUT_US);
+  return (uint32_t)(micros() - lastValidSBUS) >= SBUS_TIMEOUT_US;
 }
 
 void printRx(bool doIt)

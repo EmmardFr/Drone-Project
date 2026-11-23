@@ -70,7 +70,7 @@ void setupSD()
         while(1);
     }
 
-    logFile.println("time_us,gyroRoll,gyroPitch,gyroYaw,rxThrottle,desiredRollRate,desiredPitchRate,desiredYawRate,armSwitch,frameLost,failsafe,pRoll,iRoll,dRoll,pPitch,iPitch,dPitch,pYaw,iYaw,dYaw");
+    logFile.println("time_us, dt, gyroRoll,gyroPitch,gyroYaw,rxThrottle,desiredRollRate,desiredPitchRate,desiredYawRate,armSwitch,frameLost,failsafe,pRoll,iRoll,dRoll,pPitch,iPitch,dPitch,pYaw,iYaw,dYaw");
 
     logFile.write((const uint8_t*)&roll_coeff.p, sizeof(float));
     logFile.write((const uint8_t*)&roll_coeff.i, sizeof(float));
@@ -87,11 +87,13 @@ void setupSD()
     logFile.flush();
 }
 
-void loopSD(const Gyro &gyro)
+void loopSD(const Gyro &gyro, float &dt)
 {
     static uint32_t t0_us = micros();
 
     LogRecord record;
+
+    record.dt = dt;
 
     record.time_us = micros() - t0_us;
 

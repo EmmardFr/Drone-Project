@@ -106,7 +106,7 @@ void loop()
   // Compute PID and send commands to motors
   MOTOR_POWER motor_power;
 
-  if(rx.armSwitch == 0 && !rx.failsafe && !rxSignalLost())
+  if(rx.armSwitch == 0 && !rx.failsafe && !rx.frameLost)
   {
     sendThrottle(MOTOR_STOP, MOTOR_PIN1);
     sendThrottle(MOTOR_STOP, MOTOR_PIN2);
@@ -115,7 +115,7 @@ void loop()
 
     motor_power = {0,0,0,0};
   }
-  else if(failsafeConfirmed() || rxSignalLost())
+  else if(failsafeConfirmed() || rxSignalLost() || frameLostConfirmed())
   {
     sendThrottle(MOTOR_STOP, MOTOR_PIN1);
     sendThrottle(MOTOR_STOP, MOTOR_PIN2);
@@ -126,7 +126,7 @@ void loop()
 
     rxFlushSD = true;
   }
-  else if(rx.failsafe)
+  else if(rx.failsafe || rx.frameLost)
   {
     sendThrottle(prev_motor1, MOTOR_PIN1);
     sendThrottle(prev_motor2, MOTOR_PIN2);
@@ -164,7 +164,7 @@ void loop()
   }
 
   // log in sd card
-  loopSD(filteredGyro);
+  loopSD(filteredGyro, dt);
 
   // static uint32_t t = micros();
   // uint32_t dt = micros() - t;
