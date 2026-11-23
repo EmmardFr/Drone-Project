@@ -17,6 +17,7 @@ void stopProgram()
     {
       logFile.flush();
       logFile.close();
+      flushAllPendingSD();
       rxFlushSD = false;
 
       while(1);
@@ -39,7 +40,10 @@ void stopProgram()
   {
     logFile.flush();
     logFile.close();
+
     rxFlushSD = false;
+
+    flushAllPendingSD();
 
     while(1);
   }
@@ -77,25 +81,29 @@ void setup()
 
 void loop()
 {
+  static uint32_t nextLoop = micros() + LOOP_PERIOD_US;
+
   // rx
   if(readSBUS())
   {
     decodeSBUS(frame);
     printRx(0);
   }
+  serviceSDWriter(nextLoop);
 
   // Control loop
-  static uint32_t nextLoop = micros() + LOOP_PERIOD_US;
   if ((int32_t)(micros() - nextLoop) < 0)
     return;
 
   nextLoop += LOOP_PERIOD_US;
+  // nextLoop = micros() + LOOP_PERIOD_US;
 
+  // Gyro read and filter
   Gyro raw = readGyro();
   Gyro filteredGyro = filterGyro(raw);
-
   printGyro(0, filteredGyro);
 
+  // Compute PID and send commands to motors
   MOTOR_POWER motor_power;
 
   if(rx.armSwitch == 0)
@@ -121,7 +129,8 @@ void loop()
     sendThrottle(motor_power.motor4, MOTOR_PIN4);
   }
 
-  loopSD(filteredGyro, motor_power);
+  // log in sd card
+  loopSD(filteredGyro);
 
   // static uint32_t t = micros();
   // uint32_t dt = micros() - t;
