@@ -1,28 +1,34 @@
+// ============================================================
+// SD CARD CODE
+// ============================================================
+
 #include <SD.h>
 
 File logFile;
 
+
 struct LogRecord
 {
     uint32_t time_us;
+    float dt;
 
     float gyroRoll;
     float gyroPitch;
     float gyroYaw;
-    
+
     float rxThrottle;
     float desiredRollRate;
     float desiredPitchRate;
     float desiredYawRate;
-    
+
     uint8_t armSwitch;
     uint8_t frameLost;
     uint8_t failsafe;
-    
+
     float pRoll;
     float iRoll;
     float dRoll;
-    
+
     float pPitch;
     float iPitch;
     float dPitch;
@@ -32,13 +38,13 @@ struct LogRecord
     float dYaw;
 };
 
+
 String createLogFileName()
 {
     char filename[20];
 
     for (int i = 0; i < 10000; i++)
     {
-        // sprintf(filename, "flight_logs%04d.csv", i);
         sprintf(filename, "logs%04d.bin", i);
 
         if (!SD.exists(filename))
@@ -53,8 +59,6 @@ String createLogFileName()
 
 void setupSD()
 {
-    // Serial.println(sizeof(LogRecord));
-
     if (!SD.begin(BUILTIN_SDCARD))
     {
         Serial.println("ERROR SD_INIT");
@@ -62,6 +66,7 @@ void setupSD()
     }
 
     String filename = createLogFileName();
+
     logFile = SD.open(filename.c_str(), FILE_WRITE);
 
     if (!logFile)
@@ -70,39 +75,93 @@ void setupSD()
         while(1);
     }
 
-    logFile.println("time_us, dt, gyroRoll,gyroPitch,gyroYaw,rxThrottle,desiredRollRate,desiredPitchRate,desiredYawRate,armSwitch,frameLost,failsafe,pRoll,iRoll,dRoll,pPitch,iPitch,dPitch,pYaw,iYaw,dYaw");
 
-    logFile.write((const uint8_t*)&roll_coeff.p, sizeof(float));
-    logFile.write((const uint8_t*)&roll_coeff.i, sizeof(float));
-    logFile.write((const uint8_t*)&roll_coeff.d, sizeof(float));
-    
-    logFile.write((const uint8_t*)&pitch_coeff.p, sizeof(float));
-    logFile.write((const uint8_t*)&pitch_coeff.i, sizeof(float));
-    logFile.write((const uint8_t*)&pitch_coeff.d, sizeof(float));
-    
-    logFile.write((const uint8_t*)&yaw_coeff.p, sizeof(float));
-    logFile.write((const uint8_t*)&yaw_coeff.i, sizeof(float));
-    logFile.write((const uint8_t*)&yaw_coeff.d, sizeof(float));
+    // ========================================================
+    // Text column header
+    // ========================================================
+
+    logFile.println(
+        "time_us,dt,"
+        "gyroRoll,gyroPitch,gyroYaw,"
+        "rxThrottle,"
+        "desiredRollRate,desiredPitchRate,desiredYawRate,"
+        "armSwitch,frameLost,failsafe,"
+        "pRoll,iRoll,dRoll,"
+        "pPitch,iPitch,dPitch,"
+        "pYaw,iYaw,dYaw"
+    );
+
+
+    // ========================================================
+    // PID gains
+    // ========================================================
+
+    logFile.write(
+        (const uint8_t*)&roll_coeff.p,
+        sizeof(float)
+    );
+
+    logFile.write(
+        (const uint8_t*)&roll_coeff.i,
+        sizeof(float)
+    );
+
+    logFile.write(
+        (const uint8_t*)&roll_coeff.d,
+        sizeof(float)
+    );
+
+
+    logFile.write(
+        (const uint8_t*)&pitch_coeff.p,
+        sizeof(float)
+    );
+
+    logFile.write(
+        (const uint8_t*)&pitch_coeff.i,
+        sizeof(float)
+    );
+
+    logFile.write(
+        (const uint8_t*)&pitch_coeff.d,
+        sizeof(float)
+    );
+
+
+    logFile.write(
+        (const uint8_t*)&yaw_coeff.p,
+        sizeof(float)
+    );
+
+    logFile.write(
+        (const uint8_t*)&yaw_coeff.i,
+        sizeof(float)
+    );
+
+    logFile.write(
+        (const uint8_t*)&yaw_coeff.d,
+        sizeof(float)
+    );
 
     logFile.flush();
 }
 
-void loopSD(const Gyro &gyro, float &dt)
+
+void loopSD(const Gyro &gyro, float dt)
 {
     static uint32_t t0_us = micros();
 
     LogRecord record;
 
-    record.dt = dt;
-
     record.time_us = micros() - t0_us;
+    record.dt = dt;
 
     record.gyroRoll  = gyro.y;
     record.gyroPitch = gyro.x;
     record.gyroYaw   = gyro.z;
 
-    record.rxThrottle      = rx.throttle;
-    record.desiredRollRate = rx.roll;
+    record.rxThrottle       = rx.throttle;
+    record.desiredRollRate  = rx.roll;
     record.desiredPitchRate = -rx.pitch;
     record.desiredYawRate   = -rx.yaw;
 
@@ -122,13 +181,16 @@ void loopSD(const Gyro &gyro, float &dt)
     record.iYaw = yaw_pid.i;
     record.dYaw = yaw_pid.d;
 
-    // Write the complete structure directly as binary.
-    logFile.write((const uint8_t*)&record, sizeof(LogRecord));
+    // Write complete record as binary.
+    logFile.write(
+        (const uint8_t*)&record,
+        sizeof(LogRecord)
+    );
 }
+
 
 void downloadAllFiles()
 {
-    // Make sure the current log is completely written.
     if (logFile)
     {
         logFile.flush();
@@ -158,25 +220,19 @@ void downloadAllFiles()
             {
                 uint32_t fileSize = entry.size();
 
-                // Header:
-                // FILE <filename> <size>\n
                 Serial.print("FILE ");
                 Serial.print(filename);
                 Serial.print(" ");
                 Serial.println(fileSize);
 
-                // Wait until the PC tells us what to do.
                 while (!Serial.available())
                 {
-                    // Do nothing
                 }
 
                 char response = Serial.read();
 
                 if (response == 'S')
                 {
-                    // PC already has this file.
-                    // Skip sending it.
                     entry.close();
                     continue;
                 }
@@ -191,12 +247,12 @@ void downloadAllFiles()
                     while (1);
                 }
 
-                // Send exactly fileSize bytes.
                 uint8_t buffer[512];
 
                 while (entry.available())
                 {
-                    int bytesRead = entry.read(buffer, sizeof(buffer));
+                    int bytesRead =
+                        entry.read(buffer, sizeof(buffer));
 
                     if (bytesRead > 0)
                     {
@@ -206,10 +262,8 @@ void downloadAllFiles()
 
                 entry.close();
 
-                // Make sure everything has physically gone through USB.
                 Serial.flush();
 
-                // Tell PC the file is finished.
                 Serial.print("END\n");
             }
         }
@@ -221,7 +275,6 @@ void downloadAllFiles()
 
     Serial.println("DONE");
 
-    // Stop here. The drone must be restarted to return to flight mode.
     while (1)
     {
     }

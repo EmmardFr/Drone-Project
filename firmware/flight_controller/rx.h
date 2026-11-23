@@ -124,7 +124,8 @@ void translateToRate()
 {
   rx.roll   *= 200;
   rx.pitch  *= 200;
-  rx.yaw    *= 100;
+  // rx.yaw    *= 100;
+  rx.yaw    *= 200;
 }
 
 void decodeSBUS(uint8_t frame[25])

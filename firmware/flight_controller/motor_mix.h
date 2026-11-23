@@ -19,6 +19,7 @@ MOTOR_POWER computePower(float throttle, float roll, float pitch, float yaw)
   roll  = constrain(roll,  -1000, 1000);
   pitch = constrain(pitch, -1000, 1000);
   yaw   = constrain(yaw,   -2000, 2000);
+  // yaw   = constrain(yaw,   -1000, 1000);
 
   MOTOR_POWER pwr = {0, 0, 0, 0};
   

@@ -1,3 +1,7 @@
+// ============================================================
+// MAIN ARDUINO CODE
+// ============================================================
+
 #include "gyro.h"
 #include "rx.h"
 #include "esc.h"
@@ -6,6 +10,7 @@
 #include "sd_card.h"
 
 constexpr uint32_t LOOP_PERIOD_US = 1000; // 1 kHz
+
 
 void stopProgram()
 {
@@ -35,6 +40,7 @@ void stopProgram()
       }
     }
   }
+
   if(rxFlushSD)
   {
     logFile.flush();
@@ -46,17 +52,14 @@ void stopProgram()
   }
 }
 
+
 void setup()
 {
   setupESC();
 
-  ////////////////////////////////////////
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  ////////////////////////////////////////
 
-  // delay(2000);
-  
   Serial.begin(115200);
 
   pinMode(CS_IMU, OUTPUT);
@@ -65,46 +68,65 @@ void setup()
   SPI.begin();
   delay(50);
 
-  // Gyro setup
   setupGyro();
 
-  // SD card setup
   setupSD();
 
-  // Gyro setup
   setupRx();
-
 }
+
 
 void loop()
 {
-  // rx
+  // ==========================================================
+  // RX
+  // ==========================================================
+
   if(readSBUS())
   {
     decodeSBUS(frame);
     printRx(0);
   }
 
+
+  // ==========================================================
   // Control loop
+  // ==========================================================
+
   static uint32_t nextLoop = micros() + LOOP_PERIOD_US;
+
   if ((int32_t)(micros() - nextLoop) < 0)
     return;
-  
+
   nextLoop += LOOP_PERIOD_US;
-  // nextLoop = micros() + LOOP_PERIOD_US;
+
+
+  // ==========================================================
+  // Measure actual loop dt
+  // ==========================================================
 
   uint32_t now = micros();
-  static uint32_t prev_time = now - 1000;
+  static uint32_t prev_time = now - LOOP_PERIOD_US;
   float dt = (now - prev_time) * 1e-6f;
   prev_time = now;
 
+
+  // ==========================================================
   // Gyro read and filter
+  // ==========================================================
+
   Gyro raw = readGyro();
   Gyro filteredGyro = filterGyro(raw);
+
   printGyro(0, filteredGyro);
 
-  // Compute PID and send commands to motors
+
+  // ==========================================================
+  // PID and motors
+  // ==========================================================
+
   MOTOR_POWER motor_power;
+
 
   if(rx.armSwitch == 0 && !rx.failsafe && !rx.frameLost)
   {
@@ -113,7 +135,7 @@ void loop()
     sendThrottle(MOTOR_STOP, MOTOR_PIN3);
     sendThrottle(MOTOR_STOP, MOTOR_PIN4);
 
-    motor_power = {0,0,0,0};
+    motor_power = {0, 0, 0, 0};
   }
   else if(failsafeConfirmed() || rxSignalLost() || frameLostConfirmed())
   {
@@ -133,7 +155,12 @@ void loop()
     sendThrottle(prev_motor3, MOTOR_PIN3);
     sendThrottle(prev_motor4, MOTOR_PIN4);
 
-    motor_power = {prev_motor1, prev_motor2, prev_motor3, prev_motor4};
+    motor_power = {
+      prev_motor1,
+      prev_motor2,
+      prev_motor3,
+      prev_motor4
+    };
   }
   else
   {
@@ -150,12 +177,27 @@ void loop()
     }
     else
     {
-      computePid(rx.roll, -rx.pitch, -rx.yaw, filteredGyro.y, filteredGyro.x, filteredGyro.z, dt);
+      computePid(
+        rx.roll,
+        -rx.pitch,
+        -rx.yaw,
+        filteredGyro.y,
+        filteredGyro.x,
+        filteredGyro.z,
+        dt
+      );
+
       printPID(0);
 
-      motor_power = computePower(rx.throttle, pid.roll, pid.pitch, pid.yaw);
+      motor_power = computePower(
+        rx.throttle,
+        pid.roll,
+        pid.pitch,
+        pid.yaw
+      );
+
       printMPower(motor_power, 0);
-      
+
       sendThrottle(motor_power.motor1, MOTOR_PIN1);
       sendThrottle(motor_power.motor2, MOTOR_PIN2);
       sendThrottle(motor_power.motor3, MOTOR_PIN3);
@@ -163,14 +205,17 @@ void loop()
     }
   }
 
-  // log in sd card
+
+  // ==========================================================
+  // Log
+  // ==========================================================
+
   loopSD(filteredGyro, dt);
 
-  // static uint32_t t = micros();
-  // uint32_t dt = micros() - t;
-  // t = micros();
-  // if(dt > 1006)
-  //   Serial.println(dt);
+
+  // ==========================================================
+  // Program control
+  // ==========================================================
 
   stopProgram();
 }
