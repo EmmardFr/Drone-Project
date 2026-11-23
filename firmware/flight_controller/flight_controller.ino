@@ -82,7 +82,7 @@ void loop()
   if(readSBUS())
   {
     decodeSBUS(frame);
-    printRx(0);
+    printRx(1);
   }
 
   // Control loop
@@ -125,7 +125,7 @@ void loop()
   }
 
   // log in sd card
-  loopSD(filteredGyro, motor_power);
+  loopSD(filteredGyro);
 
   // static uint32_t t = micros();
   // uint32_t dt = micros() - t;
