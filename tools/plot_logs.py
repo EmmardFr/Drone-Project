@@ -1,15 +1,20 @@
-# to use with arduino code v5
+# to use with arduino code v3, v7, v8, v9, v10
+
+# ============================================================
+# plot_logs.py
+# ============================================================
 
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 import numpy as np
 
+
 # ============================================================
 # Configuration
 # ============================================================
 
-filename = "logs0157"
+filename = "logs0337"
 
 input_file = Path(
     f"C:/Users/zorba/Documents/DroneProject/code/software/logs/{filename}.csv"
@@ -18,20 +23,18 @@ input_file = Path(
 output_dir = Path("Teensy Dev Gyro Plots")
 output_dir.mkdir(parents=True, exist_ok=True)
 
+
 # ============================================================
 # Load CSV
 # ============================================================
 
 df = pd.read_csv(input_file)
 
-# Convert time from microseconds to seconds
 time_s = df["time_us"] / 1e6
 
+
 # ============================================================
-# Read PID gains from the log
-#
-# The gains should be constant during one flight.
-# We take the first value from each column.
+# Read PID gains
 # ============================================================
 
 roll_p = df["roll_coeff_p"].iloc[0]
@@ -46,8 +49,9 @@ yaw_p = df["yaw_coeff_p"].iloc[0]
 yaw_i = df["yaw_coeff_i"].iloc[0]
 yaw_d = df["yaw_coeff_d"].iloc[0]
 
+
 # ============================================================
-# Print information about the log
+# Print PID information
 # ============================================================
 
 print()
@@ -76,6 +80,7 @@ print(
 print("============================================================")
 print()
 
+
 # ============================================================
 # Gyroscope statistics
 # ============================================================
@@ -101,16 +106,59 @@ for axis, data in gyro_axes.items():
 
     print()
     print(f"{axis}:")
-    print(f"    Mean:       {mean:10.4f} deg/s")
-    print(f"    Std dev:    {std:10.4f} deg/s")
-    print(f"    RMS:        {rms:10.4f} deg/s")
-    print(f"    Min:        {minimum:10.4f} deg/s")
-    print(f"    Max:        {maximum:10.4f} deg/s")
-    print(f"    Peak-to-peak:{peak_to_peak:9.4f} deg/s")
+    print(f"    Mean:         {mean:10.4f} deg/s")
+    print(f"    Std dev:      {std:10.4f} deg/s")
+    print(f"    RMS:          {rms:10.4f} deg/s")
+    print(f"    Min:          {minimum:10.4f} deg/s")
+    print(f"    Max:          {maximum:10.4f} deg/s")
+    print(f"    Peak-to-peak: {peak_to_peak:10.4f} deg/s")
 
 print()
 print("============================================================")
 print()
+
+
+# ============================================================
+# Loop dt statistics
+# ============================================================
+
+dt_us = df["dt"] * 1e6
+
+print("============================================================")
+print("CONTROL LOOP DT STATISTICS")
+print("============================================================")
+
+print(
+    f"Mean dt:          {dt_us.mean():10.3f} us"
+)
+
+print(
+    f"Std dev:          {dt_us.std():10.3f} us"
+)
+
+print(
+    f"Min dt:           {dt_us.min():10.3f} us"
+)
+
+print(
+    f"Max dt:           {dt_us.max():10.3f} us"
+)
+
+print(
+    f"Mean frequency:   {1.0 / df['dt'].mean():10.2f} Hz"
+)
+
+print(
+    f"Max frequency:    {1.0 / df['dt'].min():10.2f} Hz"
+)
+
+print(
+    f"Min frequency:    {1.0 / df['dt'].max():10.2f} Hz"
+)
+
+print("============================================================")
+print()
+
 
 # ============================================================
 # Helper function
@@ -124,28 +172,23 @@ def save_figure(fig, filename):
         bbox_inches="tight"
     )
 
+
 # ============================================================
 # 1. ROLL
-#
-# Plot 1:
-# Desired roll rate vs measured roll rate
-#
-# Plot 2:
-# P / I / D contributions
 # ============================================================
 
 fig_roll_rate = plt.figure(figsize=(12, 6))
 
 plt.plot(
     time_s,
-    df["desiredRollRate"],
-    label="Desired roll rate"
+    df["gyroRoll"],
+    label="Measured roll rate"
 )
 
 plt.plot(
     time_s,
-    df["gyroRoll"],
-    label="Measured roll rate"
+    df["desiredRollRate"],
+    label="Desired roll rate"
 )
 
 plt.xlabel("Time [s]")
@@ -160,7 +203,14 @@ save_figure(
     f"{filename}_roll_rate.png"
 )
 
+
 fig_roll_pid = plt.figure(figsize=(12, 6))
+
+plt.plot(
+    time_s,
+    df["dRoll"],
+    label="D"
+)
 
 plt.plot(
     time_s,
@@ -172,12 +222,6 @@ plt.plot(
     time_s,
     df["iRoll"],
     label="I"
-)
-
-plt.plot(
-    time_s,
-    df["dRoll"],
-    label="D"
 )
 
 plt.xlabel("Time [s]")
@@ -196,28 +240,23 @@ save_figure(
     f"{filename}_roll_pid.png"
 )
 
+
 # ============================================================
 # 2. PITCH
-#
-# Plot 1:
-# Desired pitch rate vs measured pitch rate
-#
-# Plot 2:
-# P / I / D contributions
 # ============================================================
 
 fig_pitch_rate = plt.figure(figsize=(12, 6))
 
 plt.plot(
     time_s,
-    df["desiredPitchRate"],
-    label="Desired pitch rate"
+    df["gyroPitch"],
+    label="Measured pitch rate"
 )
 
 plt.plot(
     time_s,
-    df["gyroPitch"],
-    label="Measured pitch rate"
+    df["desiredPitchRate"],
+    label="Desired pitch rate"
 )
 
 plt.xlabel("Time [s]")
@@ -232,7 +271,14 @@ save_figure(
     f"{filename}_pitch_rate.png"
 )
 
+
 fig_pitch_pid = plt.figure(figsize=(12, 6))
+
+plt.plot(
+    time_s,
+    df["dPitch"],
+    label="D"
+)
 
 plt.plot(
     time_s,
@@ -244,12 +290,6 @@ plt.plot(
     time_s,
     df["iPitch"],
     label="I"
-)
-
-plt.plot(
-    time_s,
-    df["dPitch"],
-    label="D"
 )
 
 plt.xlabel("Time [s]")
@@ -268,28 +308,23 @@ save_figure(
     f"{filename}_pitch_pid.png"
 )
 
+
 # ============================================================
 # 3. YAW
-#
-# Plot 1:
-# Desired yaw rate vs measured yaw rate
-#
-# Plot 2:
-# P / I / D contributions
 # ============================================================
 
 fig_yaw_rate = plt.figure(figsize=(12, 6))
 
 plt.plot(
     time_s,
-    df["desiredYawRate"],
-    label="Desired yaw rate"
+    df["gyroYaw"],
+    label="Measured yaw rate"
 )
 
 plt.plot(
     time_s,
-    df["gyroYaw"],
-    label="Measured yaw rate"
+    df["desiredYawRate"],
+    label="Desired yaw rate"
 )
 
 plt.xlabel("Time [s]")
@@ -304,7 +339,14 @@ save_figure(
     f"{filename}_yaw_rate.png"
 )
 
+
 fig_yaw_pid = plt.figure(figsize=(12, 6))
+
+plt.plot(
+    time_s,
+    df["dYaw"],
+    label="D"
+)
 
 plt.plot(
     time_s,
@@ -316,12 +358,6 @@ plt.plot(
     time_s,
     df["iYaw"],
     label="I"
-)
-
-plt.plot(
-    time_s,
-    df["dYaw"],
-    label="D"
 )
 
 plt.xlabel("Time [s]")
@@ -340,50 +376,9 @@ save_figure(
     f"{filename}_yaw_pid.png"
 )
 
-# ============================================================
-# 4. MOTOR OUTPUTS
-# ============================================================
-
-# fig_motors = plt.figure(figsize=(12, 6))
-
-# plt.plot(
-#     time_s,
-#     df["motor1"],
-#     label="Motor 1"
-# )
-
-# plt.plot(
-#     time_s,
-#     df["motor2"],
-#     label="Motor 2"
-# )
-
-# plt.plot(
-#     time_s,
-#     df["motor3"],
-#     label="Motor 3"
-# )
-
-# plt.plot(
-#     time_s,
-#     df["motor4"],
-#     label="Motor 4"
-# )
-
-# plt.xlabel("Time [s]")
-# plt.ylabel("Motor command")
-# plt.title(f"{filename} - Motor Outputs")
-
-# plt.grid(True)
-# plt.legend()
-
-# save_figure(
-#     fig_motors,
-#     f"{filename}_motors.png"
-# )
 
 # ============================================================
-# 5. ALL MEASURED GYRO AXES
+# 4. ALL MEASURED GYRO AXES
 # ============================================================
 
 fig_gyro = plt.figure(figsize=(12, 6))
@@ -418,8 +413,9 @@ save_figure(
     f"{filename}_all_gyro.png"
 )
 
+
 # ============================================================
-# 6. RECEIVER / DESIRED RATES
+# 5. RECEIVER / DESIRED RATES
 # ============================================================
 
 fig_desired = plt.figure(figsize=(12, 6))
@@ -453,6 +449,37 @@ save_figure(
     fig_desired,
     f"{filename}_desired_rates.png"
 )
+
+# ============================================================
+# 6. DT VS TIME
+# ============================================================
+
+fig_dt = plt.figure(figsize=(12, 6))
+
+plt.plot(
+    time_s,
+    dt_us,
+    label="Loop dt"
+)
+
+plt.axhline(
+    1000,
+    linestyle="--",
+    label="Target = 1000 us"
+)
+
+plt.xlabel("Time [s]")
+plt.ylabel("Loop period [us]")
+plt.title(f"{filename} - Control Loop dt")
+
+plt.grid(True)
+plt.legend()
+
+save_figure(
+    fig_dt,
+    f"{filename}_dt.png"
+)
+
 
 # ============================================================
 # 7. SAFETY STATES
@@ -494,8 +521,9 @@ save_figure(
     f"{filename}_states.png"
 )
 
+
 # ============================================================
-# Show ALL plots simultaneously
+# Show all plots
 # ============================================================
 
 plt.show()
