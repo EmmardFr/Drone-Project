@@ -1,8 +1,7 @@
-// Moving integral
 // #define ROLLING_WINDOW_SIZE 256
+
 #define ROLLING_WINDOW_SIZE 0
-// Accumulating integral + safety limit
-#define I_LIMIT 10.0f
+#define I_LIMIT 25.0f
 
 struct PID_AXIS{
   float roll;
@@ -34,9 +33,9 @@ struct ROLLING_WINDOW{
   float yaw[ROLLING_WINDOW_SIZE];
 };
 
-constexpr PID roll_coeff  = {1.00, 4.00, 0.00};
-constexpr PID pitch_coeff = {1.00, 4.00, 0.00};
-constexpr PID yaw_coeff   = {1.00, 4.00, 0.00};
+constexpr PID roll_coeff  = {0.80, 3.50, 0.0001};
+constexpr PID pitch_coeff = {0.80, 3.50, 0.0001};
+constexpr PID yaw_coeff   = {0.80, 5.00, 0.0001};
 
 constexpr float dt = 0.001;
 
@@ -65,6 +64,8 @@ PID updateErrors(float current_control_rate, float current_gyro_rate, float prev
   }
   else
   {
+    // errors.i += current_error;
+    
     integral += current_error * dt;
     integral = constrain(integral, -I_LIMIT, I_LIMIT);
 

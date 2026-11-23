@@ -2,44 +2,13 @@
 
 File logFile;
 
-struct LogRecord
-{
-    uint32_t time_us;
-
-    float gyroRoll;
-    float gyroPitch;
-    float gyroYaw;
-    
-    float rxThrottle;
-    float desiredRollRate;
-    float desiredPitchRate;
-    float desiredYawRate;
-    
-    uint8_t armSwitch;
-    uint8_t frameLost;
-    uint8_t failsafe;
-    
-    float pRoll;
-    float iRoll;
-    float dRoll;
-    
-    float pPitch;
-    float iPitch;
-    float dPitch;
-
-    float pYaw;
-    float iYaw;
-    float dYaw;
-};
-
 String createLogFileName()
 {
     char filename[20];
 
     for (int i = 0; i < 10000; i++)
     {
-        // sprintf(filename, "flight_logs%04d.csv", i);
-        sprintf(filename, "logs%04d.bin", i);
+        sprintf(filename, "logs%04d.csv", i);
 
         if (!SD.exists(filename))
         {
@@ -53,76 +22,82 @@ String createLogFileName()
 
 void setupSD()
 {
-    // Serial.println(sizeof(LogRecord));
-
-    if (!SD.begin(BUILTIN_SDCARD))
-    {
-        Serial.println("ERROR SD_INIT");
+    if (!SD.begin(BUILTIN_SDCARD)) {
+        Serial.println("SD init failed!");
         while(1);
     }
 
     String filename = createLogFileName();
     logFile = SD.open(filename.c_str(), FILE_WRITE);
 
-    if (!logFile)
-    {
+    if (!logFile) {
         Serial.println("Failed to open file");
         while(1);
     }
 
+    // logFile.println("time_us,gyroX,gyroY,gyroZ,rxThrottle,rxRoll,rxPitch,rxYaw,armSwitch,frameLost,failsafe,pidRoll,pidPitch,pidYaw,motor1,motor2,motor3,motor4");
     logFile.println("time_us,gyroRoll,gyroPitch,gyroYaw,rxThrottle,desiredRollRate,desiredPitchRate,desiredYawRate,armSwitch,frameLost,failsafe,pRoll,iRoll,dRoll,pPitch,iPitch,dPitch,pYaw,iYaw,dYaw");
-
-    logFile.write((const uint8_t*)&roll_coeff.p, sizeof(float));
-    logFile.write((const uint8_t*)&roll_coeff.i, sizeof(float));
-    logFile.write((const uint8_t*)&roll_coeff.d, sizeof(float));
-    
-    logFile.write((const uint8_t*)&pitch_coeff.p, sizeof(float));
-    logFile.write((const uint8_t*)&pitch_coeff.i, sizeof(float));
-    logFile.write((const uint8_t*)&pitch_coeff.d, sizeof(float));
-    
-    logFile.write((const uint8_t*)&yaw_coeff.p, sizeof(float));
-    logFile.write((const uint8_t*)&yaw_coeff.i, sizeof(float));
-    logFile.write((const uint8_t*)&yaw_coeff.d, sizeof(float));
-
     logFile.flush();
 }
 
-void loopSD(const Gyro &gyro)
+void loopSD(const Gyro &gyro, const MOTOR_POWER &pwr)
 {
     static uint32_t t0_us = micros();
+    uint32_t t = micros() - t0_us;
 
-    LogRecord record;
+    logFile.print(t);
+    logFile.print(",");
+    logFile.print(gyro.y);
+    logFile.print(",");
+    logFile.print(gyro.x);
+    logFile.print(",");
+    logFile.print(gyro.z);
+    logFile.print(",");
 
-    record.time_us = micros() - t0_us;
+    logFile.print(rx.throttle);
+    logFile.print(",");
+    logFile.print(rx.roll);
+    logFile.print(",");
+    logFile.print(-rx.pitch);
+    logFile.print(",");
+    logFile.print(-rx.yaw);
+    logFile.print(",");
+    logFile.print(rx.armSwitch);
+    logFile.print(",");
+    logFile.print(rx.frameLost);
+    logFile.print(",");
+    logFile.print(rx.failsafe);
+    logFile.print(",");
 
-    record.gyroRoll  = gyro.y;
-    record.gyroPitch = gyro.x;
-    record.gyroYaw   = gyro.z;
+    logFile.print(roll_pid.p);
+    logFile.print(",");
+    logFile.print(roll_pid.i);
+    logFile.print(",");
+    logFile.print(roll_pid.d);
+    logFile.print(",");
 
-    record.rxThrottle      = rx.throttle;
-    record.desiredRollRate = rx.roll;
-    record.desiredPitchRate = -rx.pitch;
-    record.desiredYawRate   = -rx.yaw;
+    logFile.print(pitch_pid.p);
+    logFile.print(",");
+    logFile.print(pitch_pid.i);
+    logFile.print(",");
+    logFile.print(pitch_pid.d);
+    logFile.print(",");
 
-    record.armSwitch = rx.armSwitch;
-    record.frameLost = rx.frameLost;
-    record.failsafe  = rx.failsafe;
+    logFile.print(yaw_pid.p);
+    logFile.print(",");
+    logFile.print(yaw_pid.i);
+    logFile.print(",");
+    logFile.println(yaw_pid.d);
 
-    record.pRoll = roll_pid.p;
-    record.iRoll = roll_pid.i;
-    record.dRoll = roll_pid.d;
-
-    record.pPitch = pitch_pid.p;
-    record.iPitch = pitch_pid.i;
-    record.dPitch = pitch_pid.d;
-
-    record.pYaw = yaw_pid.p;
-    record.iYaw = yaw_pid.i;
-    record.dYaw = yaw_pid.d;
-
-    // Write the complete structure directly as binary.
-    logFile.write((const uint8_t*)&record, sizeof(LogRecord));
+    // logFile.print(pwr.motor1);
+    // logFile.print(",");
+    // logFile.print(pwr.motor2);
+    // logFile.print(",");
+    // logFile.print(pwr.motor3);
+    // logFile.print(",");
+    // logFile.println(pwr.motor4);
 }
+
 
 void downloadAllFiles()
 {
@@ -152,7 +127,7 @@ void downloadAllFiles()
         {
             String filename = entry.name();
 
-            if (filename.endsWith(".bin"))
+            if (filename.endsWith(".csv"))
             {
                 uint32_t fileSize = entry.size();
 
