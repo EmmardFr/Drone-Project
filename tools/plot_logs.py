@@ -8,9 +8,12 @@ from pathlib import Path
 
 # ============================================================
 
-filename = "logs0302"
+filename = "logs0027"
 
-input_file = Path(f"C:/Users/zorba/Documents/DroneProject/code/software/logs/{filename}.csv")
+input_file = Path(
+f"C:/Users/zorba/Documents/DroneProject/code/software/logs/{filename}.csv"
+)
+
 output_dir = Path("Teensy Dev Gyro Plots")
 output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -28,66 +31,441 @@ time_s = df["time_us"] / 1e6
 
 # ============================================================
 
-# 1. Gyroscope
+# Read PID gains from the log
+
+#
+
+# The gains should be constant during one flight.
+
+# We take the first value from each column.
 
 # ============================================================
 
-plt.figure(figsize=(12, 6))
+roll_p = df["roll_coeff_p"].iloc[0]
+roll_i = df["roll_coeff_i"].iloc[0]
+roll_d = df["roll_coeff_d"].iloc[0]
 
-plt.plot(time_s, df["gyroX"], label="gyroX")
-plt.plot(time_s, df["gyroY"], label="gyroY")
-plt.plot(time_s, df["gyroZ"], label="gyroZ")
+pitch_p = df["pitch_coeff_p"].iloc[0]
+pitch_i = df["pitch_coeff_i"].iloc[0]
+pitch_d = df["pitch_coeff_d"].iloc[0]
+
+yaw_p = df["yaw_coeff_p"].iloc[0]
+yaw_i = df["yaw_coeff_i"].iloc[0]
+yaw_d = df["yaw_coeff_d"].iloc[0]
+
+# ============================================================
+
+# Print information about the log
+
+# ============================================================
+
+print()
+print("============================================================")
+print(f"Flight log: {filename}")
+print("============================================================")
+
+print(
+f"Roll  PID: P = {roll_p:.4f}, "
+f"I = {roll_i:.4f}, "
+f"D = {roll_d:.4f}"
+)
+
+print(
+f"Pitch PID: P = {pitch_p:.4f}, "
+f"I = {pitch_i:.4f}, "
+f"D = {pitch_d:.4f}"
+)
+
+print(
+f"Yaw   PID: P = {yaw_p:.4f}, "
+f"I = {yaw_i:.4f}, "
+f"D = {yaw_d:.4f}"
+)
+
+print("============================================================")
+print()
+
+# ============================================================
+
+# Helper function
+
+# ============================================================
+
+def save_figure(fig, filename):
+    fig.tight_layout()
+    fig.savefig(
+    output_dir / filename,
+    dpi=300,
+    bbox_inches="tight"
+)
+
+# ============================================================
+
+# 1. ROLL
+
+#
+
+# Plot 1:
+
+# Desired roll rate vs measured roll rate
+
+#
+
+# Plot 2:
+
+# P / I / D contributions
+
+# ============================================================
+
+fig_roll_rate = plt.figure(figsize=(12, 6))
+
+plt.plot(
+time_s,
+df["desiredRollRate"],
+label="Desired roll rate"
+)
+
+plt.plot(
+time_s,
+df["gyroRoll"],
+label="Measured roll rate"
+)
 
 plt.xlabel("Time [s]")
 plt.ylabel("Angular rate [deg/s]")
-plt.title(f"{filename} - Gyroscope")
+plt.title(f"{filename} - Roll Rate Tracking")
+
 plt.grid(True)
 plt.legend()
 
-plt.tight_layout()
-plt.savefig(
-output_dir / f"{filename}_gyro.png",
-dpi=300,
-bbox_inches="tight"
+save_figure(
+fig_roll_rate,
+f"{filename}_roll_rate.png"
 )
 
-plt.show()
+fig_roll_pid = plt.figure(figsize=(12, 6))
 
-# ============================================================
+plt.plot(
+time_s,
+df["pRoll"],
+label="P"
+)
 
-# 2. Receiver inputs
+plt.plot(
+time_s,
+df["iRoll"],
+label="I"
+)
 
-# ============================================================
-
-plt.figure(figsize=(12, 8))
-
-plt.plot(time_s, df["rxThrottle"], label="Throttle")
-plt.plot(time_s, df["rxRoll"], label="Roll")
-plt.plot(time_s, df["rxPitch"], label="Pitch")
-plt.plot(time_s, df["rxYaw"], label="Yaw")
+plt.plot(
+time_s,
+df["dRoll"],
+label="D"
+)
 
 plt.xlabel("Time [s]")
-plt.ylabel("RX command")
-plt.title(f"{filename} - Receiver Inputs")
+plt.ylabel("PID contribution")
+
+plt.title(
+f"{filename} - Roll PID Terms "
+f"(P={roll_p:g}, I={roll_i:g}, D={roll_d:g})"
+)
+
 plt.grid(True)
 plt.legend()
 
-plt.tight_layout()
-plt.savefig(
-output_dir / f"{filename}_rx.png",
-dpi=300,
-bbox_inches="tight"
+save_figure(
+fig_roll_pid,
+f"{filename}_roll_pid.png"
 )
 
-plt.show()
+# ============================================================
+
+# 2. PITCH
+
+#
+
+# Plot 1:
+
+# Desired pitch rate vs measured pitch rate
+
+#
+
+# Plot 2:
+
+# P / I / D contributions
 
 # ============================================================
 
-# 3. Arm / failsafe / frame loss
+fig_pitch_rate = plt.figure(figsize=(12, 6))
+
+plt.plot(
+time_s,
+df["desiredPitchRate"],
+label="Desired pitch rate"
+)
+
+plt.plot(
+time_s,
+df["gyroPitch"],
+label="Measured pitch rate"
+)
+
+plt.xlabel("Time [s]")
+plt.ylabel("Angular rate [deg/s]")
+plt.title(f"{filename} - Pitch Rate Tracking")
+
+plt.grid(True)
+plt.legend()
+
+save_figure(
+fig_pitch_rate,
+f"{filename}_pitch_rate.png"
+)
+
+fig_pitch_pid = plt.figure(figsize=(12, 6))
+
+plt.plot(
+time_s,
+df["pPitch"],
+label="P"
+)
+
+plt.plot(
+time_s,
+df["iPitch"],
+label="I"
+)
+
+plt.plot(
+time_s,
+df["dPitch"],
+label="D"
+)
+
+plt.xlabel("Time [s]")
+plt.ylabel("PID contribution")
+
+plt.title(
+f"{filename} - Pitch PID Terms "
+f"(P={pitch_p:g}, I={pitch_i:g}, D={pitch_d:g})"
+)
+
+plt.grid(True)
+plt.legend()
+
+save_figure(
+fig_pitch_pid,
+f"{filename}_pitch_pid.png"
+)
 
 # ============================================================
 
-plt.figure(figsize=(12, 5))
+# 3. YAW
+
+#
+
+# Plot 1:
+
+# Desired yaw rate vs measured yaw rate
+
+#
+
+# Plot 2:
+
+# P / I / D contributions
+
+# ============================================================
+
+fig_yaw_rate = plt.figure(figsize=(12, 6))
+
+plt.plot(
+time_s,
+df["desiredYawRate"],
+label="Desired yaw rate"
+)
+
+plt.plot(
+time_s,
+df["gyroYaw"],
+label="Measured yaw rate"
+)
+
+plt.xlabel("Time [s]")
+plt.ylabel("Angular rate [deg/s]")
+plt.title(f"{filename} - Yaw Rate Tracking")
+
+plt.grid(True)
+plt.legend()
+
+save_figure(
+fig_yaw_rate,
+f"{filename}_yaw_rate.png"
+)
+
+fig_yaw_pid = plt.figure(figsize=(12, 6))
+
+plt.plot(
+time_s,
+df["pYaw"],
+label="P"
+)
+
+plt.plot(
+time_s,
+df["iYaw"],
+label="I"
+)
+
+plt.plot(
+time_s,
+df["dYaw"],
+label="D"
+)
+
+plt.xlabel("Time [s]")
+plt.ylabel("PID contribution")
+
+plt.title(
+f"{filename} - Yaw PID Terms "
+f"(P={yaw_p:g}, I={yaw_i:g}, D={yaw_d:g})"
+)
+
+plt.grid(True)
+plt.legend()
+
+save_figure(
+fig_yaw_pid,
+f"{filename}_yaw_pid.png"
+)
+
+# ============================================================
+
+# 4. MOTOR OUTPUTS
+
+# ============================================================
+
+fig_motors = plt.figure(figsize=(12, 6))
+
+plt.plot(
+time_s,
+df["motor1"],
+label="Motor 1"
+)
+
+plt.plot(
+time_s,
+df["motor2"],
+label="Motor 2"
+)
+
+plt.plot(
+time_s,
+df["motor3"],
+label="Motor 3"
+)
+
+plt.plot(
+time_s,
+df["motor4"],
+label="Motor 4"
+)
+
+plt.xlabel("Time [s]")
+plt.ylabel("Motor command")
+plt.title(f"{filename} - Motor Outputs")
+
+plt.grid(True)
+plt.legend()
+
+save_figure(
+fig_motors,
+f"{filename}_motors.png"
+)
+
+# ============================================================
+
+# 5. ALL MEASURED GYRO AXES
+
+# ============================================================
+
+fig_gyro = plt.figure(figsize=(12, 6))
+
+plt.plot(
+time_s,
+df["gyroRoll"],
+label="Roll"
+)
+
+plt.plot(
+time_s,
+df["gyroPitch"],
+label="Pitch"
+)
+
+plt.plot(
+time_s,
+df["gyroYaw"],
+label="Yaw"
+)
+
+plt.xlabel("Time [s]")
+plt.ylabel("Angular rate [deg/s]")
+plt.title(f"{filename} - Measured Angular Rates")
+
+plt.grid(True)
+plt.legend()
+
+save_figure(
+fig_gyro,
+f"{filename}_all_gyro.png"
+)
+
+# ============================================================
+
+# 6. RECEIVER / DESIRED RATES
+
+# ============================================================
+
+fig_desired = plt.figure(figsize=(12, 6))
+
+plt.plot(
+time_s,
+df["desiredRollRate"],
+label="Desired Roll"
+)
+
+plt.plot(
+time_s,
+df["desiredPitchRate"],
+label="Desired Pitch"
+)
+
+plt.plot(
+time_s,
+df["desiredYawRate"],
+label="Desired Yaw"
+)
+
+plt.xlabel("Time [s]")
+plt.ylabel("Desired angular rate [deg/s]")
+plt.title(f"{filename} - Desired Angular Rates")
+
+plt.grid(True)
+plt.legend()
+
+save_figure(
+fig_desired,
+f"{filename}_desired_rates.png"
+)
+
+# ============================================================
+
+# 7. SAFETY STATES
+
+# ============================================================
+
+fig_states = plt.figure(figsize=(12, 5))
 
 plt.step(
 time_s,
@@ -113,70 +491,20 @@ label="Failsafe"
 plt.xlabel("Time [s]")
 plt.ylabel("State")
 plt.title(f"{filename} - Safety States")
+
 plt.yticks([0, 1])
 plt.grid(True)
 plt.legend()
 
-plt.tight_layout()
-plt.savefig(
-output_dir / f"{filename}_states.png",
-dpi=300,
-bbox_inches="tight"
+save_figure(
+fig_states,
+f"{filename}_states.png"
 )
 
-plt.show()
-
 # ============================================================
 
-# 4. PID outputs
+# Show ALL plots simultaneously
 
 # ============================================================
-
-plt.figure(figsize=(12, 6))
-
-plt.plot(time_s, df["pidRoll"], label="PID Roll")
-plt.plot(time_s, df["pidPitch"], label="PID Pitch")
-plt.plot(time_s, df["pidYaw"], label="PID Yaw")
-
-plt.xlabel("Time [s]")
-plt.ylabel("PID output")
-plt.title(f"{filename} - PID Outputs")
-plt.grid(True)
-plt.legend()
-
-plt.tight_layout()
-plt.savefig(
-output_dir / f"{filename}_pid.png",
-dpi=300,
-bbox_inches="tight"
-)
-
-plt.show()
-
-# ============================================================
-
-# 5. Motor outputs
-
-# ============================================================
-
-plt.figure(figsize=(12, 6))
-
-plt.plot(time_s, df["motor1"], label="Motor 1")
-plt.plot(time_s, df["motor2"], label="Motor 2")
-plt.plot(time_s, df["motor3"], label="Motor 3")
-plt.plot(time_s, df["motor4"], label="Motor 4")
-
-plt.xlabel("Time [s]")
-plt.ylabel("Motor command")
-plt.title(f"{filename} - Motor Outputs")
-plt.grid(True)
-plt.legend()
-
-plt.tight_layout()
-plt.savefig(
-output_dir / f"{filename}_motors.png",
-dpi=300,
-bbox_inches="tight"
-)
 
 plt.show()
