@@ -1,23 +1,23 @@
 struct RCChannels {
-    uint16_t throttle;
-    uint16_t roll;
-    uint16_t pitch;
-    uint16_t yaw;
+    float throttle;
+    float roll;
+    float pitch;
+    float yaw;
 
-    uint16_t armSwitch;
-    uint16_t switch2;
-    uint16_t switch3;
-    uint16_t switch4;
-    uint16_t switch5;
-    uint16_t switch6;
+    int armSwitch;
+    int switch2;
+    int switch3;
+    int switch4;
+    int switch5;
+    int switch6;
 
-    uint16_t pot1;
-    uint16_t pot2;
+    float pot1;
+    float pot2;
 
-    uint16_t ch13;
-    uint16_t ch14;
-    uint16_t ch15;
-    uint16_t ch16;
+    float ch13;
+    float ch14;
+    float ch15;
+    float ch16;
 
     bool frameLost;
     bool failsafe;
@@ -73,7 +73,25 @@ void decodeSBUS(uint8_t frame[25])
 
   rx.frameLost  =   frame[23] & (1 << 2);
   rx.failsafe   =   frame[23] & (1 << 3);
+
+  normalizeChannels();
 }
+
+void normalizeChannels()
+{
+  rx.throttle   =       rx.throttle / 2000.0;
+  rx.roll       =   (rx.roll - 992) / 1000.0;
+  rx.pitch      =  (rx.pitch - 992) / 1000.0;
+  rx.yaw        =    (rx.yaw - 992) / 1000.0;
+
+  rx.armSwitch  = (rx.armSwitch > 1000) ? 1 : 0;
+  rx.switch2    = (rx.switch2 > 1500) ? 1 : ((rx.switch2 < 500) ? -1 : 0);
+  rx.switch3    = (rx.switch3 > 1500) ? 1 : ((rx.switch3 < 500) ? -1 : 0);
+  rx.switch4    = (rx.switch4 > 1500) ? 1 : ((rx.switch4 < 500) ? -1 : 0);
+  rx.switch5    = (rx.switch5 > 1500) ? 1 : ((rx.switch5 < 500) ? -1 : 0);
+  rx.switch6    = (rx.switch6 > 1500) ? 1 : ((rx.switch6 < 500) ? -1 : 0);
+}
+
 
 void setup()
 {
@@ -88,42 +106,49 @@ void loop()
   {
     uint16_t dt1 = micros() - t;
     Serial.print("dt1 ");
-    Serial.println(dt1);
+    Serial.print(dt1);
+    Serial.print('\t');
     
     decodeSBUS(frame);
 
     uint16_t dt2 = micros() - t;
     Serial.print("dt2 ");
-    Serial.println(dt2);
+    Serial.print(dt2);
+    Serial.print('\t');
 
-    // Serial.print(rx.throttle);
-    // Serial.print('\t');
-    // Serial.print(rx.roll);
-    // Serial.print('\t');
-    // Serial.print(rx.pitch);
-    // Serial.print('\t');
-    // Serial.print(rx.yaw);
-    // Serial.print('\t');
+    Serial.print(rx.throttle);
+    Serial.print('\t');
+    Serial.print(rx.roll);
+    Serial.print('\t');
+    Serial.print(rx.pitch);
+    Serial.print('\t');
+    Serial.print(rx.yaw);
+    Serial.print('\t');
 
-    // Serial.print(rx.armSwitch);
-    // Serial.print('\t');
-    // Serial.print(rx.switch3);
-    // Serial.print('\t');
-    // Serial.print(rx.switch4);
-    // Serial.print('\t');
-    // Serial.print(rx.switch5);
-    // Serial.print('\t');
-    // Serial.print(rx.switch6);
-    // Serial.println('\t');
+    Serial.print(rx.armSwitch);
+    Serial.print('\t');
+    Serial.print(rx.switch3);
+    Serial.print('\t');
+    Serial.print(rx.switch4);
+    Serial.print('\t');
+    Serial.print(rx.switch5);
+    Serial.print('\t');
+    Serial.print(rx.switch6);
+    Serial.print('\t');
 
-    // for(uint8_t i = 0; i < 25; ++i)
-    // {
-    //   Serial.print(frame[i], HEX);
-    //   Serial.print(' ');
-    // }
-    uint16_t dt = micros() - t;
-    Serial.print("dt ");
-    Serial.println(dt);
+    Serial.print(rx.pot1);
+    Serial.print('\t');
+    Serial.print(rx.pot2);
+    Serial.print('\t');
+
+    Serial.print(rx.frameLost);
+    Serial.print('\t');
+    Serial.print(rx.failsafe);
+    Serial.println('\t');
+
+    // uint16_t dt = micros() - t;
+    // Serial.print("dt ");
+    // Serial.println(dt);
     // Serial.println();
   }
   // uint16_t dt = t - micros();
