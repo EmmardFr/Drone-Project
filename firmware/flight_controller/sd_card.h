@@ -36,7 +36,7 @@ void setupSD()
     }
 
     // logFile.println("time_us,gyroX,gyroY,gyroZ,rxThrottle,rxRoll,rxPitch,rxYaw,armSwitch,frameLost,failsafe,pidRoll,pidPitch,pidYaw,motor1,motor2,motor3,motor4");
-    logFile.println("time_us,gyroRoll,gyroPitch,gyroYaw,rxThrottle,desiredRollRate,desiredPitchRate,desiredYawRate,armSwitch,frameLost,failsafe,pRoll,iRoll,dRoll,pPitch,iPitch,dPitch,pYaw,iYaw,dYaw,roll_coeff_p,roll_coeff_i,roll_coeff_d,pitch_coeff_p,pitch_coeff_i,pitch_coeff_d,yaw_coeff_p,yaw_coeff_i,yaw_coeff_d");
+    logFile.println("time_us,gyroRoll,gyroPitch,gyroYaw,rxThrottle,desiredRollRate,desiredPitchRate,desiredYawRate,armSwitch,frameLost,failsafe,pRoll,iRoll,dRoll,pPitch,iPitch,dPitch,pYaw,iYaw,dYaw");
     logFile.flush();
 }
 
@@ -87,28 +87,7 @@ void loopSD(const Gyro &gyro, const MOTOR_POWER &pwr)
     logFile.print(",");
     logFile.print(yaw_pid.i);
     logFile.print(",");
-    logFile.print(yaw_pid.d);
-    logFile.print(",");
-
-    logFile.print(roll_coeff.p);
-    logFile.print(",");
-    logFile.print(roll_coeff.i);
-    logFile.print(",");
-    logFile.print(roll_coeff.d);
-    logFile.print(",");
-
-    logFile.print(pitch_coeff.p);
-    logFile.print(",");
-    logFile.print(pitch_coeff.i);
-    logFile.print(",");
-    logFile.print(pitch_coeff.d);
-    logFile.print(",");
-
-    logFile.print(yaw_coeff.p);
-    logFile.print(",");
-    logFile.print(yaw_coeff.i);
-    logFile.print(",");
-    logFile.println(yaw_coeff.d);
+    logFile.println(yaw_pid.d);
 
     // logFile.print(pwr.motor1);
     // logFile.print(",");
